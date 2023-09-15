@@ -10,30 +10,42 @@ public class Main {
         System.out.println("Guess this 5 digit number!");
         int guessnum = 1;
         Random rand = new Random();
-        int randomNum = rand.nextInt(100000);
-        int guess = console.nextInt();
+        String randomNum = "";
+        randomNum += rand.nextInt(100000);
+        while (true) {
+            String guess = "" + console.nextInt();
+            if (guess.length() == 5)
+                break;
+            else
+                System.out.println("Please type in a number with 5 digits");
+        }
+        while (guess != randomNum){
+            System.out.println("Incorrect");
+            guessnum++;
+            int[] correct;
+        }
         /*
         Scanner console = new Scanner(System.in);
-        int xmin = -10;
-        int xmax = 10;
-        int ymin = -10;
-        int ymax = 10;
+        int xMin = -10;
+        int xMax = 10;
+        int yMin = -10;
+        int yMax = 10;
         char t = 9607;
         char yaxis = 9553;
         char center = 9580;
-        char xaxis = 9552;
-        for(int ylevel = ymax; ylevel >= ymin; ylevel--)
+        char xAxis = 9552;
+        for(int yLevel = yMax; yLevel >= yMin; yLevel--)
         {
-            for (int xlevel = xmin; xlevel <= xmax; xlevel++)
+            for (int xLevel = xMin; xLevel <= xMax; xLevel++)
             {
 
-                if (runFunction(xlevel) == ylevel)
+                if (runFunction(xLevel) == yLevel)
                     System.out.print(t);
-                else if (xlevel == 0 && ylevel == 0)
+                else if (xLevel == 0 && yLevel == 0)
                     System.out.print(center);
-                else if (ylevel == 0)
-                    System.out.print(xaxis);
-                else if (xlevel == 0)
+                else if (yLevel == 0)
+                    System.out.print(xAxis);
+                else if (xLevel == 0)
                     System.out.print(yaxis);
                 else
                     System.out.print(' ');
