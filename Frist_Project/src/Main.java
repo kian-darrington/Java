@@ -8,6 +8,7 @@ public class Main {
         final int NUMBER_LENGTH = 4;
         final int NUMBER_AMOUNT = 6;
         System.out.println("Welcome to MasterMind!\nGuesses should have "+NUMBER_LENGTH+" digits with numbers ranging from 0 - " + (NUMBER_AMOUNT - 1));
+        System.out.println("When you guess, you receive pegs based on the correctness of your guess. Black pegs mean correct position and color, white means correct color");
         Random rand = new Random();
 
         boolean play = true;
@@ -65,7 +66,7 @@ public class Main {
                         }
                     }
                 }
-                System.out.println("You got " + numberCorrect + " white pins and " + numberKindOfCorrect + " black pins");
+                System.out.println("You got " + numberCorrect + " back pins and " + numberKindOfCorrect + " white pins");
                 System.out.println("That is incorrect, try again!");
                 guessNum++;
                 while (true) {
@@ -74,7 +75,7 @@ public class Main {
                         break;
                     else if (guess.equals("g")) {
                         System.out.println(randomNum);
-                        break;
+                        return;
                     } else
                         System.out.println("Please type in a number with " + NUMBER_LENGTH + " digits");
                 }
@@ -89,7 +90,7 @@ public class Main {
                 }
                 else if (guess.equals("n")) {
                     play = false;
-                    break;
+                    return;
                 } else
                     System.out.println("Please type in a 'y' or 'n'");
             }
