@@ -33,6 +33,8 @@ public class MastermindTester {
       int whitePegs = 0;
       int blackPegs = 0;
       boolean[] answerGuess = new boolean[NUMBER_LENGTH], guessCheck = new boolean[NUMBER_LENGTH];
+      for (int i = 0; i < NUMBER_LENGTH; i++){
+      }
       for (int i = 0; i < NUMBER_LENGTH; i++) {
         char currentRealLetter = codeword1.charAt(i);
         char currentGuessLetter = codeword2.charAt(i);

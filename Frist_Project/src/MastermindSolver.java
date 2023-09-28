@@ -2,6 +2,13 @@ import java.util.*;
 public class MastermindSolver {
     public static final int NUMBER_LENGTH = 4;
     public static final int COLOR_AMOUNT = 6;
+    public static ArrayList<String> reference = new ArrayList<>();
+    Random rand = new Random();
+
+    MastermindSolver(){
+        initializeList();
+    }
+
     public static int[] scoreCodewords(String codeword1, String codeword2) {
         int whitePegs = 0;
         int blackPegs = 0;
@@ -35,13 +42,28 @@ public class MastermindSolver {
         }
         return new int[]{blackPegs, whitePegs};
     }
-    public static int guess(String answer) {
+    public int guess(String answer) {
+        int guessNum = 0;
+        ArrayList<String> possibleAnswers = new ArrayList<>(reference);
         while (true) {
-
+            guessNum++;
+            int randNum = rand.nextInt(possibleAnswers.size());
+            if (possibleAnswers.get(randNum).equals(answer))
+                break;
+            else
+                possibleAnswers.remove(randNum);
         }
+        return guessNum;
     }
-    public static int[] compute (int[] guesses, int [] responses, String answer) {
-        String guess = "";
-        return scoreCodewords(answer, guess);
+    public static void initializeList(){
+        for (int i = 0; i < COLOR_AMOUNT; i++){
+            for (int o = 0; o < COLOR_AMOUNT; o++){
+                for (int p = 0; p < COLOR_AMOUNT; p++){
+                    for (int w = 0; w < COLOR_AMOUNT; w++){
+                        reference.add("" + i + o + p + w);
+                    }
+                }
+            }
+        }
     }
 }
