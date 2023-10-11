@@ -5,5 +5,6 @@ public class JavaTest {
     }
     public static void main(String[] args) {
         System.out.println(isSuch(99) + " " +isSuch(100));
+        String thing = "1234";
     }
 }

@@ -26,45 +26,33 @@ public class MastermindTester {
       super("Kian Darrington"); // Put your name or GitHub username here
     }
     public final int NUMBER_LENGTH = 4;
-
+    public final int COLOR_AMOUNT = 6;
     // Return black hits (correct color and position) in [0] and white hits (correct color but wrong
     // position) in [1].
-    public int[] scoreCodewords(String codeword1, String codeword2) {
-      int whitePegs = 0;
-      int blackPegs = 0;
-      boolean[] answerGuess = new boolean[NUMBER_LENGTH], guessCheck = new boolean[NUMBER_LENGTH];
+    public int[] colorChecker(String str)
+    {
+      int[] colorCount = new int[COLOR_AMOUNT];
       for (int i = 0; i < NUMBER_LENGTH; i++){
+        colorCount[Character.getNumericValue(str.charAt(i))]++;
       }
+      return colorCount;
+    }
+    public int[] scoreCodewords(String codeword1, String codeword2) {
+      int[] color1 = colorChecker(codeword1);
+      int[] color2 = colorChecker(codeword2);
+      int matches = 0;
+      for (int i = 0; i < COLOR_AMOUNT; i++){
+        matches += Math.min(color1[i], color2[i]);
+      }
+      int blackPegs = 0;
       for (int i = 0; i < NUMBER_LENGTH; i++) {
         char currentRealLetter = codeword1.charAt(i);
         char currentGuessLetter = codeword2.charAt(i);
-        if (currentGuessLetter == currentRealLetter && !answerGuess[i] && !guessCheck[i]) {
-          answerGuess[i] = true;
-          guessCheck[i] = true;
+        if (currentGuessLetter == currentRealLetter) {
           blackPegs++;
         }
       }
-      if (blackPegs == NUMBER_LENGTH) {
-        return new int[] {4, 0};
-      }
-
-      else {
-        for (int i = 0; i < NUMBER_LENGTH; i++) {
-          char currentGuessLetter;
-          char currentRealLetter = codeword1.charAt(i);
-          for (int o = 0; o < NUMBER_LENGTH; o++) {
-            if (o == i)
-              continue;
-            currentGuessLetter = codeword2.charAt(o);
-            if (currentGuessLetter == currentRealLetter && !answerGuess[i] && !guessCheck[o]) {
-              guessCheck[o] = true;
-              answerGuess[i] = true;
-              whitePegs++;
-            }
-          }
-        }
-      }
-      return new int[] {blackPegs, whitePegs};
+      return new int[]{blackPegs, matches - blackPegs};
     }
   }
 
