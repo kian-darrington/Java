@@ -1,8 +1,10 @@
 import java.util.ArrayList;
+import java.util.Scanner;
 
 public class MastermindRunner {
     public static final int COLOR_AMOUNT = 6;
     public static void main(String[] args) {
+        Scanner console = new Scanner(System.in);
         int guessNum = 0;
         int timesRan = 0;
         MastermindSolver m = new MastermindSolver();
@@ -11,12 +13,12 @@ public class MastermindRunner {
                 for (int p = 0; p < COLOR_AMOUNT; p++){
                     for (int w = 0; w < COLOR_AMOUNT; w++){
                         String answer = "" + i + o + p + w;
-                        guessNum += m.guess(answer);
+                        guessNum += m.RandSymmetryGuess(answer);
                         timesRan++;
                     }
                 }
             }
         }
-        System.out.println("\nIt took on average " + (double)guessNum/(double)timesRan +" tries ");
+        System.out.println("It took on average " + (double)guessNum / (double) timesRan +" tries");
     }
 }

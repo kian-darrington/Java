@@ -33,7 +33,7 @@ public class MastermindTester {
     {
       int[] colorCount = new int[COLOR_AMOUNT];
       for (int i = 0; i < NUMBER_LENGTH; i++){
-        colorCount[Character.getNumericValue(str.charAt(i))]++;
+        colorCount[Character.getNumericValue(str.charAt(i)) - 1]++;
       }
       return colorCount;
     }
