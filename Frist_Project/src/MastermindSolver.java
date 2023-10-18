@@ -69,15 +69,22 @@ public class MastermindSolver {
                 }
             }
             ArrayList<ArrayList<String>> betterAnswerPools = new ArrayList<>();
+            ArrayList<ArrayList<int[]>> betterColorPools = new ArrayList<>();
+            int bestIndex = 0;
+            int currentSize = possibleAnswers.size();
             for (int i = 0; i < reference.size(); i++){
+                betterAnswerPools.add(possibleAnswers);
+                betterColorPools.add(possibleColors);
                 for (int o = 0; o < possibleAnswers.size(); o++){
-                    if (!Arrays.equals(scoreCodewords(possibleAnswers.get(i), Guess, possibleColors.get(i), FirstAnsColor), FirstAns)) {
-                        possibleAnswers.remove(i);
-                        possibleColors.remove(i);
+                    if (!scoreCodewords(betterAnswerPools.get(i).get(o), reference.get(i), betterColorPools.get(i).get(o), colorReference.get(i)).equals(FirstAns)) {
+                        betterAnswerPools.get(i).remove(o);
+                        betterColorPools.get(i).remove(o);
                     }
+                    if (betterAnswerPools.get(i).size() < currentSize)
+                        bestIndex = i;
                 }
             }
-            Guess = possibleAnswers.get(rand.nextInt(possibleAnswers.size()));
+            Guess = reference.get(bestIndex);
         }
         return guessNum;
     }
