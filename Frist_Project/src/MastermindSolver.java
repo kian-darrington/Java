@@ -43,7 +43,7 @@ public class MastermindSolver {
         return scoreCodewords(codeword1, codeword2, color1, color2);
     }
     //Method of playing Mastermind that randomly selects from all possible solution each time (it's pretty bad)
-    public int Randguess(String answer) {
+    public int randGuess(String answer) {
         int guessNum = 0;
         ArrayList<String> possibleAnswers = new ArrayList<>(reference);
         while (true) {
@@ -76,7 +76,7 @@ public class MastermindSolver {
             int[] FirstAns = scoreCodewords(Guess, answer);
             int[] FirstAnsColor = colorChecker(Guess);
 
-            //This goes through either all available answers and compares them to the existing code score to narrow the possibilities
+            //This goes through either all available answers scores and compares them to the existing guess score to narrow the possibilities
             for (int i = 0; i < possibleAnswers.size(); i++) {
                 if (!Arrays.equals(scoreCodewords(possibleAnswers.get(i), Guess, possibleColors.get(i), FirstAnsColor), FirstAns)) {
                     possibleAnswers.remove(i);
@@ -89,7 +89,7 @@ public class MastermindSolver {
         }
         return guessNum;
     }
-    //
+    //This function pairs down the list similarly to the RandSymmetryGuess function, however, it now tries to select the optimal guess instead of random
     public int KnuthGuess(String answer) {
         int guessNum = 0;
 
@@ -101,11 +101,13 @@ public class MastermindSolver {
         while (true) {
             guessNum++;
 
+            System.out.println(Guess);
             if (Guess.equals(answer))
                 break;
 
             int[] FirstAns = scoreCodewords(Guess, answer);
             int[] FirstAnsColor = colorChecker(Guess);
+
 
             for (int i = 0; i < possibleAnswers.size(); i++) {
                 if (!Arrays.equals(scoreCodewords(possibleAnswers.get(i), Guess, possibleColors.get(i), FirstAnsColor), FirstAns)) {
@@ -115,24 +117,31 @@ public class MastermindSolver {
             }
 
             //This begins the prediction of which guesses will limit the future list of possible answers the most
-            ArrayList<ArrayList<String>> betterAnswerPools = new ArrayList<>();
-            ArrayList<ArrayList<int[]>> betterColorPools = new ArrayList<>();
-            int bestIndex = possibleAnswers.size();
-            for (int i = 0; i < possibleAnswers.size(); i++){
-                betterAnswerPools.add(new ArrayList<>(possibleAnswers));
-                betterColorPools.add(new ArrayList<>(possibleColors));
-                for (int o = 0; o < possibleAnswers.size(); o++){
-                    if (!Arrays.equals(scoreCodewords(betterAnswerPools.get(i).get(o), possibleAnswers.get(i), betterColorPools.get(i).get(o), possibleColors.get(i)), scoreCodewords(Guess, possibleAnswers.get(i), FirstAnsColor, possibleColors.get(i)))) {
-                        betterAnswerPools.get(i).remove(o);
-                        betterColorPools.get(i).remove(o);
-                    }
-                    if (betterAnswerPools.get(i).size() < bestIndex)
-                        bestIndex = i;
+            int maxGuess = 99999;
+            String tempGuess = Guess;
+            boolean bestIsPossible = false;
+            for (int i = 0; i < reference.size(); i++){
+                boolean inPossible = false;
+                int[] scores = new int[41];
+                for  (int o = 0; o < possibleAnswers.size(); o++){
+                    int[] temp = scoreCodewords(reference.get(i), possibleAnswers.get(o), colorReference.get(i), possibleColors.get(o));
+                    scores[temp[0] * 10 + temp[1]]++;
+                }
+                int currentMax = Arrays.stream(scores).max().getAsInt();
+                inPossible = possibleAnswers.contains(reference.get(i));
+                if (currentMax < maxGuess){
+                    tempGuess = reference.get(i);
+                    maxGuess = currentMax;
+                    bestIsPossible = inPossible;
+                }
+                else if (currentMax == maxGuess && !bestIsPossible && inPossible) {
+                    tempGuess = reference.get(i);
+                    bestIsPossible = inPossible;
                 }
             }
-            Guess = possibleAnswers.get(bestIndex);
-            System.out.println(Guess);
+            Guess = tempGuess;
         }
+        System.out.println(' ');
         return guessNum;
     }
     //Initializes every possible instance of a Mastermind codeword and its corresponding color score
