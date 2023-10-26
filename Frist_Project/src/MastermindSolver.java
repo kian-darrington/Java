@@ -1,4 +1,5 @@
 import java.util.*;
+//When using this class, you should create an instance it of anytime you need to run something repeatedly, otherwise unnecessary slowing downs will happen
 public class MastermindSolver {
     public static final int NUMBER_LENGTH = 4;
     public static final int COLOR_AMOUNT = 6;
@@ -57,8 +58,12 @@ public class MastermindSolver {
         return guessNum;
     }
     //Narrows down the possible answers by using guess-answer symmetry
-    //After narrowing down the list it then randomly selects from the remaining options for the next guess
-    public int RandSymmetryGuess(String answer) {
+    //After narrowing down the list it then chooses the 1 possible answer
+    //Currently, this functions run at about 580 milliseconds for all 1296 possibilities
+    //The average guess rate of this is 5.021604938271605
+    //This algorithm will guess no more than 8 times
+    public int firstSymGuess(String answer)
+    {
         int guessNum = 0;
 
         String Guess = FIRST_GUESS;
@@ -81,16 +86,57 @@ public class MastermindSolver {
                 if (!Arrays.equals(scoreCodewords(possibleAnswers.get(i), Guess, possibleColors.get(i), FirstAnsColor), FirstAns)) {
                     possibleAnswers.remove(i);
                     possibleColors.remove(i);
+                    i--;
+                }
+            }
+
+            Guess = possibleAnswers.get(0);
+            //System.out.println(Guess);
+        }
+        return guessNum;
+    }
+    //Narrows down the possible answers by using guess-answer symmetry
+    //After narrowing down the list it then randomly selects from the remaining options for the next guess
+    //Currently, this functions runs at about 630 milliseconds for all 1296 possibilities
+    //The average guess rate is about 4.635308
+    //This algorithm will guess no more than 8 times, but its average max guess will be 7
+    public int randSymGuess(String answer) {
+        int guessNum = 0;
+
+        String Guess = FIRST_GUESS;
+
+        //copies the list of all possible codewords and the corresponding color codes
+        ArrayList<String> possibleAnswers = new ArrayList<>(reference);
+        ArrayList<int[]> possibleColors = new ArrayList<>(colorReference);
+
+        while (true) {
+            guessNum++;
+
+            if (Guess.equals(answer))
+                break;
+            //Checks the guess and the guess color score
+            int[] FirstAns = scoreCodewords(Guess, answer);
+            int[] FirstAnsColor = colorChecker(Guess);
+
+            //This goes through either all available answers scores and compares them to the existing guess score to narrow the possibilities
+            for (int i = 0; i < possibleAnswers.size(); i++) {
+                if (!Arrays.equals(scoreCodewords(possibleAnswers.get(i), Guess, possibleColors.get(i), FirstAnsColor), FirstAns)) {
+                    possibleAnswers.remove(i);
+                    possibleColors.remove(i);
+                    i--;
                 }
             }
 
             Guess = possibleAnswers.get(rand.nextInt(possibleAnswers.size()));
-            System.out.println(Guess);
+            //System.out.println(Guess);
         }
         return guessNum;
     }
-    //This function pairs down the list similarly to the RandSymmetryGuess function, however, it now tries to select the optimal guess instead of random
-    public int KnuthGuess(String answer) {
+    //This function pairs down the list similarly to the RandSymmetryGuess function, however, it now selects the guess that will narrow down the possible future answers
+    //Currently, this functions runs just under 13 seconds for all 1296 possibilities
+    //The average guess rate is 4.47608024691358
+    //This algorithm will NOT guess more than 5 times
+    public int knuthGuess(String answer) {
         int guessNum = 0;
 
         String Guess = FIRST_GUESS;
@@ -101,7 +147,7 @@ public class MastermindSolver {
         while (true) {
             guessNum++;
 
-            System.out.println(Guess);
+            //System.out.println(Guess);
             if (Guess.equals(answer))
                 break;
 
@@ -113,6 +159,7 @@ public class MastermindSolver {
                 if (!Arrays.equals(scoreCodewords(possibleAnswers.get(i), Guess, possibleColors.get(i), FirstAnsColor), FirstAns)) {
                     possibleAnswers.remove(i);
                     possibleColors.remove(i);
+                    i--;
                 }
             }
 
@@ -139,10 +186,16 @@ public class MastermindSolver {
                     bestIsPossible = inPossible;
                 }
             }
+            //if (!bestIsPossible){
+            //    System.out.print('*');
+            //}
             Guess = tempGuess;
         }
-        System.out.println(' ');
+        //System.out.println(' ');
         return guessNum;
+    }
+    boolean knuthMaxGuess(String answer){
+        return knuthGuess(answer) < 6;
     }
     //Initializes every possible instance of a Mastermind codeword and its corresponding color score
     public static void initializeList(){
