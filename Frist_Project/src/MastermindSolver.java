@@ -12,7 +12,7 @@ public class MastermindSolver {
 
     //Counts the number of the colors in a codeword, and situates them in the appropriate order in an int[]
     //For example, the codeword 4431 returns { 0, 1, 0, 1, 2, 0 },
-    //with the total value of the array adding up to the number of pins
+    //with the total sum of the array adding up to the number of pins (4)
     public static int[] colorChecker(String str)
     {
         int[] colorCount = new int[COLOR_AMOUNT];
@@ -99,7 +99,7 @@ public class MastermindSolver {
     //After narrowing down the list it then randomly selects from the remaining options for the next guess
     //Currently, this functions runs at about 630 milliseconds for all 1296 possibilities
     //The average guess rate is about 4.635308
-    //This algorithm will guess no more than 8 times, but its average max guess will be 7
+    //This algorithm will guess no more than 8 times at the extreme, but its average max guess will be 7
     public int randSymGuess(String answer) {
         int guessNum = 0;
 
@@ -118,7 +118,8 @@ public class MastermindSolver {
             int[] FirstAns = scoreCodewords(Guess, answer);
             int[] FirstAnsColor = colorChecker(Guess);
 
-            //This goes through either all available answers scores and compares them to the existing guess score to narrow the possibilities
+            //This goes through all available answers scores and compares them to the existing guess score
+            //If the score is different (the possible codeword is not a possible secret as verified through answer-guess symmetry) it will be removed
             for (int i = 0; i < possibleAnswers.size(); i++) {
                 if (!Arrays.equals(scoreCodewords(possibleAnswers.get(i), Guess, possibleColors.get(i), FirstAnsColor), FirstAns)) {
                     possibleAnswers.remove(i);
@@ -154,7 +155,8 @@ public class MastermindSolver {
             int[] FirstAns = scoreCodewords(Guess, answer);
             int[] FirstAnsColor = colorChecker(Guess);
 
-
+            //This goes through all available answers scores and compares them to the existing guess score
+            //If the score is different (the possible codeword is not a possible secret as verified through answer-guess symmetry) it will be removed
             for (int i = 0; i < possibleAnswers.size(); i++) {
                 if (!Arrays.equals(scoreCodewords(possibleAnswers.get(i), Guess, possibleColors.get(i), FirstAnsColor), FirstAns)) {
                     possibleAnswers.remove(i);
@@ -170,17 +172,25 @@ public class MastermindSolver {
             for (int i = 0; i < reference.size(); i++){
                 boolean inPossible = false;
                 int[] scores = new int[41];
+
+                //Scores a codeword from the reference list (current codeword) against the all possible answers list and saves them in the scores[]
                 for  (int o = 0; o < possibleAnswers.size(); o++){
                     int[] temp = scoreCodewords(reference.get(i), possibleAnswers.get(o), colorReference.get(i), possibleColors.get(o));
                     scores[temp[0] * 10 + temp[1]]++;
                 }
+
+                //The maximum element of the array is recorded as the worst case scenario
                 int currentMax = Arrays.stream(scores).max().getAsInt();
+                //Checks to see if the codeword is in the possible answer list
                 inPossible = possibleAnswers.contains(reference.get(i));
+                //If the max of the current codeword is better than the max of the current best codeword, the best codeword will take precedent
                 if (currentMax < maxGuess){
                     tempGuess = reference.get(i);
                     maxGuess = currentMax;
                     bestIsPossible = inPossible;
                 }
+                //If the current codeword shares the max value of the best codeword, and the best is not in the possible answer lists
+                //Then it will be replaced by a possible answer (because it's better to guess a possible answer of course)
                 else if (currentMax == maxGuess && !bestIsPossible && inPossible) {
                     tempGuess = reference.get(i);
                     bestIsPossible = inPossible;
@@ -193,9 +203,6 @@ public class MastermindSolver {
         }
         //System.out.println(' ');
         return guessNum;
-    }
-    boolean knuthMaxGuess(String answer){
-        return knuthGuess(answer) < 6;
     }
     //Initializes every possible instance of a Mastermind codeword and its corresponding color score
     public static void initializeList(){

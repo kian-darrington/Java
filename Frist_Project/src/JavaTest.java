@@ -1,10 +1,14 @@
 import java.util.*;
 public class JavaTest {
-    public static boolean isSuch (int n){
-        return n > 2 && !isSuch(n-2);
-    }
     public static void main(String[] args) {
-        System.out.println(isSuch(99) + " " +isSuch(100));
-        String thing = "1234";
+        Random rand = new Random(1);
+        int[] amount = new int[6];
+        for (int i = 0; i < 1000; i++)
+        {
+            int tempRand = rand.nextInt(6)+1;
+            amount[tempRand - 1]++;
+            System.out.println(tempRand);
+        }
+        System.out.println(Arrays.toString(amount));
     }
 }
