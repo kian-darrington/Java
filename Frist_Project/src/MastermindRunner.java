@@ -9,7 +9,7 @@ public class MastermindRunner {
     public static void main(String[] args) {
         Scanner console = new Scanner(System.in);
         ArrayList<Boolean> above5 = new ArrayList<>();
-        int[] guessNum = new int[1296];
+        int guessNum = 0;
         int timesRan = 0;
         MastermindSolver m = new MastermindSolver();
         Clock clock = Clock.systemDefaultZone();
@@ -19,14 +19,14 @@ public class MastermindRunner {
                 for (int p = 0; p < COLOR_AMOUNT; p++){
                     for (int w = 0; w < COLOR_AMOUNT; w++){
                         String answer = "" + i + o + p + w;
-                        guessNum[timesRan] = m.firstSymGuess(answer);
+                        guessNum = m.firstSymGuess(answer);
                         timesRan++;
                     }
                 }
             }
         }
-        System.out.println(Arrays.stream(guessNum).max().getAsInt());
-        //System.out.println("It took " + (double)guessNum / (double)timesRan + " times and " + (clock.millis() - startTime) + " millis");
+
+        System.out.println("It took " + (double)guessNum / (double)timesRan + " times and " + (clock.millis() - startTime) + " millis");
         /*while (true) {
             String guess = console.nextLine();
             guessNum = m.knuthGuess(guess);
