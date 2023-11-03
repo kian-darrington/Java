@@ -10,23 +10,34 @@ public class MastermindSolver {
     {
         private int codeword = 0;
         private int[] colors = new int[COLOR_AMOUNT];
-        public void SetCodeword(int Codewords, int[] Colors)
+        private int index = 0;
+        public void setCodeword(int Codewords, int[] Colors, int INDEX)
         {
             codeword = Codewords;
             colors = Colors.clone();
+            index = INDEX;
         }
-        Codeword (int temp, int[] Colors)
+        public void setCodeword(Codeword code){
+            codeword = code.getCodeword();
+            colors = code.getColors();
+            index = code.getIndex();
+        }
+        Codeword (int temp, int[] Colors, int INDEX)
         {
             codeword = temp;
             colors = Colors.clone();
+            index = INDEX;
         }
         Codeword (Codeword code) {
             codeword = code.getCodeword();
             colors = code.getColors();
+            index = code.getIndex();
         }
         Codeword(){}
         public int getCodeword(){ return codeword; }
         public int [] getColors(){ return colors; }
+        public int codeDigit(int index){return placeReturn(codeword, index);}
+        public int getIndex(){return index;}
     }
     public static final int NUMBER_LENGTH = 4;
     public static final int COLOR_AMOUNT = 6;
@@ -38,10 +49,22 @@ public class MastermindSolver {
         }
         return IndexFinder(temp);
     }
-    public static int IndexFinder(int temp){
+    static int placeReturn(int code, int place)
+    {
+        return (code % (int)Math.pow(10, place + 1)) / (int)Math.pow(10, place);
+    }
+    public static int IndexFinder(int temp)
+    {
         int index = 0;
-        for (int i = 0; i < NUMBER_LENGTH; i--){
-            temp += ((temp % (int)Math.pow(10, i)) / (int)Math.pow(10, i)) * (int) Math.pow(COLOR_AMOUNT, i);
+        for (int i = 0; i < NUMBER_LENGTH; i++){
+            index += placeReturn(temp, i) * (int) Math.pow(COLOR_AMOUNT, i);
+        }
+        return index;
+    }
+    public static int IndexFinder(String str){
+        int index = 0;
+        for (int i = 0; i < NUMBER_LENGTH; i++){
+            index += Character.getNumericValue(str.charAt(i)) * (int) Math.pow(COLOR_AMOUNT, i);
         }
         return index;
     }
@@ -71,11 +94,11 @@ public class MastermindSolver {
         }
         int blackPegs = 0;
         for (int i = 0; i < NUMBER_LENGTH; i++) {
-            if (code1.getCodeword().charAt(i) == code2.getCodeword().charAt(i)) {
+            if (code1.codeDigit(i) == code2.codeDigit(i)) {
                 blackPegs++;
             }
         }
-        return (blackPegs * 10) +matches - blackPegs;
+        return (blackPegs * 10) + matches - blackPegs;
     }
     public static int scoreCodewords(int i1, int i2){
         return scoreCodewords(Reference.get(i1), Reference.get(i2));
@@ -83,11 +106,12 @@ public class MastermindSolver {
     //Method of playing Mastermind that randomly selects from all possible solution each time (it's pretty bad)
     public int randGuess(String answer) {
         int guessNum = 0;
+        int AnswerIndex = IndexFinder(answer);
         ArrayList<Codeword> possibleAnswers = new ArrayList<>(Reference);
         while (true) {
             guessNum++;
             int randNum = rand.nextInt(possibleAnswers.size());
-            if (possibleAnswers.get(randNum).getCodeword().equals(answer))
+            if (possibleAnswers.get(randNum).getIndex() == AnswerIndex)
                 break;
             else
                 possibleAnswers.remove(randNum);
@@ -189,9 +213,9 @@ public class MastermindSolver {
             int maxGuess = 99999;
             int tempGuess = Guess;
             boolean bestIsPossible = false;
+            int[] scores = new int[41];
             for (int i = 0; i < Reference.size(); i++){
                 boolean inPossible = false;
-                int[] scores = new int[41];
 
                 //Scores a codeword from the reference list (current codeword) against the all possible answers list and saves them in the scores[]
                 for  (int o = 0; o < possibleAnswers.size(); o++){
@@ -199,10 +223,16 @@ public class MastermindSolver {
                     scores[score]++;
                 }
 
-                //The maximum element of the array is recorded as the worst case scenario
-                int currentMax = Arrays.stream(scores).max().getAsInt();
                 //Checks to see if the codeword is in the possible answer list
                 inPossible = scores[40] == 1;
+
+                //The maximum element of the array is recorded as the worst case scenario
+                int currentMax = 0;
+                for (int o = 0; o < scores.length; o++){
+                    if (scores[o] > currentMax)
+                        currentMax = scores[o];
+                    scores[o] = 0;
+                }
                 //If the max of the current codeword is better than the max of the current best codeword, the best codeword will take precedent
                 if (currentMax < maxGuess){
                     tempGuess = i;
@@ -226,6 +256,7 @@ public class MastermindSolver {
     }
     //Initializes every possible instance of a Mastermind codeword and its corresponding color score
     public static void initializeList(){
+        int Rt = 0;
         for (int i = 0; i < COLOR_AMOUNT; i++){
             for (int o = 0; o < COLOR_AMOUNT; o++){
                 for (int p = 0; p < COLOR_AMOUNT; p++){
@@ -235,7 +266,8 @@ public class MastermindSolver {
                         temp[o]++;
                         temp[p]++;
                         temp[w]++;
-                        Reference.add(new Codeword("" + i + o + p + w, temp));
+                        Reference.add(new Codeword( (i* 1000) + (o* 100) + (p * 10) + w, temp, Rt));
+                        Rt++;
                     }
                 }
             }
