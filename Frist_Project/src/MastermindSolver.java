@@ -44,14 +44,14 @@ public class MastermindSolver {
     public static int FirstGuessSetUp(){
         int temp = 0;
         for (int i = 0; i < NUMBER_LENGTH; i++) {
-            if (i > NUMBER_LENGTH / 2)
+            if (i >= NUMBER_LENGTH / 2)
             {temp *= 10; temp++;}
         }
         return IndexFinder(temp);
     }
     static int placeReturn(int code, int place)
     {
-        return (code % (int)Math.pow(10, place + 1)) / (int)Math.pow(10, place);
+        return code % (int)Math.pow(10, place + 1) / (int)Math.pow(10, place);
     }
     public static int IndexFinder(int temp)
     {
@@ -198,7 +198,7 @@ public class MastermindSolver {
         while (true) {
             guessNum++;
 
-            //System.out.println(Guess);
+            System.out.println(Guess);
             if (Guess == Answer)
                 break;
 
