@@ -12,21 +12,20 @@ public class MastermindRunner {
         int guessNum = 0;
         int timesRan = 0;
         MastermindSolver m = new MastermindSolver();
-        Clock clock = Clock.systemDefaultZone();
-        long startTime = clock.millis();
+        long startTime = System.nanoTime();
         for (int i = 0; i < COLOR_AMOUNT; i++){
             for (int o = 0; o < COLOR_AMOUNT; o++){
                 for (int p = 0; p < COLOR_AMOUNT; p++){
                     for (int w = 0; w < COLOR_AMOUNT; w++){
                         String answer = "" + i + o + p + w;
-                        guessNum += m.knuthGuess(answer);
+                        guessNum += m.firstSymGuess(answer);
                         timesRan++;
                     }
                 }
             }
         }
 
-        System.out.println("It took " + (double)guessNum / (double)timesRan + " times and " + (clock.millis() - startTime) + " millis");
+        System.out.println("It took " + (double)guessNum / (double)timesRan + " times and " + (float)(System.nanoTime() - startTime) / 1000000 + " millis");
         /*while (true) {
             String guess = console.nextLine();
             guessNum = m.knuthGuess(guess);

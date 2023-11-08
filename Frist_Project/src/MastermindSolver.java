@@ -36,7 +36,6 @@ public class MastermindSolver {
         Codeword(){}
         public int getCodeword(){ return codeword; }
         public int [] getColors(){ return colors; }
-        public int codeDigit(int index){return placeReturn(codeword, index);}
         public int getIndex(){return index;}
     }
     public static final int NUMBER_LENGTH = 4;
@@ -49,15 +48,12 @@ public class MastermindSolver {
         }
         return IndexFinder(temp);
     }
-    static int placeReturn(int code, int place)
-    {
-        return code % (int)Math.pow(10, place + 1) / (int)Math.pow(10, place);
-    }
     public static int IndexFinder(int temp)
     {
         int index = 0;
-        for (int i = 0; i < NUMBER_LENGTH; i++){
-            index += placeReturn(temp, i) * (int) Math.pow(COLOR_AMOUNT, i);
+        for (int i = NUMBER_LENGTH - 1; i >= 0; i--){
+            index += (temp % 10) * (int) Math.pow(COLOR_AMOUNT, NUMBER_LENGTH - (i + 1));
+            temp /= 10;
         }
         return index;
     }
@@ -89,14 +85,18 @@ public class MastermindSolver {
     //Returns an int[] of two values {black pegs, white pegs}
     public static int scoreCodewords(Codeword code1, Codeword code2){
         int matches = 0;
-        for (int i = 0; i < COLOR_AMOUNT; i++){
+        for (int i = 0; i < COLOR_AMOUNT; i++)
             matches += Math.min(code1.getColors()[i], code2.getColors()[i]);
-        }
+
         int blackPegs = 0;
+        int temp1 = code1.getCodeword(), temp2 = code2.getCodeword();
+
         for (int i = 0; i < NUMBER_LENGTH; i++) {
-            if (code1.codeDigit(i) == code2.codeDigit(i)) {
+            int cd1 = temp1 % 10, cd2 = temp2 % 10;
+            temp1 /= 10;
+            temp2 /= 10;
+            if (cd1 == cd2)
                 blackPegs++;
-            }
         }
         return (blackPegs * 10) + matches - blackPegs;
     }
@@ -120,7 +120,7 @@ public class MastermindSolver {
     }
     //Narrows down the possible answers by using guess-answer symmetry
     //After narrowing down the list it then chooses the 1 possible answer
-    //Currently, this functions run at about 580 milliseconds for all 1296 possibilities
+    //Currently, this functions run at about 146.26483 milliseconds for all 1296 possibilities
     //The average guess rate of this is 5.021604938271605
     //This algorithm will guess no more than 8 times
     public int firstSymGuess(String answer)
@@ -218,8 +218,8 @@ public class MastermindSolver {
                 boolean inPossible = false;
 
                 //Scores a codeword from the reference list (current codeword) against the all possible answers list and saves them in the scores[]
-                for  (int o = 0; o < possibleAnswers.size(); o++){
-                    int score = scoreCodewords(Reference.get(i), possibleAnswers.get(o));
+                for (Codeword possibleAnswer : possibleAnswers) {
+                    int score = scoreCodewords(Reference.get(i), possibleAnswer);
                     scores[score]++;
                 }
 
