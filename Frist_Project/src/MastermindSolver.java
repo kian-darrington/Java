@@ -6,38 +6,6 @@ import java.util.function.Predicate;
 
 //When using this class, you should create an instance it of anytime you need to run something repeatedly, otherwise unnecessary slowing downs will happen
 public class MastermindSolver {
-    private static class Codeword
-    {
-        private int codeword = 0;
-        private int[] colors = new int[COLOR_AMOUNT];
-        private int index = 0;
-        public void setCodeword(int Codewords, int[] Colors, int INDEX)
-        {
-            codeword = Codewords;
-            colors = Colors.clone();
-            index = INDEX;
-        }
-        public void setCodeword(Codeword code){
-            codeword = code.getCodeword();
-            colors = code.getColors();
-            index = code.getIndex();
-        }
-        Codeword (int temp, int[] Colors, int INDEX)
-        {
-            codeword = temp;
-            colors = Colors.clone();
-            index = INDEX;
-        }
-        Codeword (Codeword code) {
-            codeword = code.getCodeword();
-            colors = code.getColors();
-            index = code.getIndex();
-        }
-        Codeword(){}
-        public int getCodeword(){ return codeword; }
-        public int [] getColors(){ return colors; }
-        public int getIndex(){return index;}
-    }
     public static final int NUMBER_LENGTH = 4;
     public static final int COLOR_AMOUNT = 6;
     public static int FirstGuessSetUp(){
@@ -120,7 +88,7 @@ public class MastermindSolver {
     }
     //Narrows down the possible answers by using guess-answer symmetry
     //After narrowing down the list it then chooses the 1 possible answer
-    //Currently, this functions run at about 146.26483 milliseconds for all 1296 possibilities
+    //Currently, this functions run at about 135 milliseconds for all 1296 possibilities
     //The average guess rate of this is 5.021604938271605
     //This algorithm will guess no more than 8 times
     public int firstSymGuess(String answer)
@@ -152,7 +120,7 @@ public class MastermindSolver {
     }
     //Narrows down the possible answers by using guess-answer symmetry
     //After narrowing down the list it then randomly selects from the remaining options for the next guess
-    //Currently, this functions runs at about 630 milliseconds for all 1296 possibilities
+    //Currently, this functions runs at about 140 milliseconds for all 1296 possibilities
     //The average guess rate is about 4.635308
     //This algorithm will guess no more than 8 times at the extreme, but its average max guess will be 7
     public int randSymGuess(String answer) {
@@ -183,7 +151,7 @@ public class MastermindSolver {
         return guessNum;
     }
     //This function pairs down the list similarly to the RandSymmetryGuess function, however, it now selects the guess that will narrow down the possible future answers
-    //Currently, this functions runs 11235 millis for all 1296 possibilities
+    //Currently, this functions runs about 6000 millis for all 1296 possibilities
     //The average guess rate is 4.47608024691358
     //This algorithm will NOT guess more than 5 times
     public int knuthGuess(String answer) {
@@ -198,7 +166,7 @@ public class MastermindSolver {
         while (true) {
             guessNum++;
 
-            System.out.println(Guess);
+            //System.out.println(Guess);
             if (Guess == Answer)
                 break;
 
@@ -210,8 +178,71 @@ public class MastermindSolver {
             possibleAnswers.removeIf(codeword -> scoreCodewords(temp, codeword) != FirstAns);
 
             //This begins the prediction of which guesses will limit the future list of possible answers the most
-            int maxGuess = 99999;
-            int tempGuess = Guess;
+            ArrayList<KnuthThread> threads = new ArrayList<>();
+            int indexVal = (int) Math.pow(COLOR_AMOUNT, NUMBER_LENGTH - 1);
+            for (int i = 0; i < COLOR_AMOUNT; i++) {
+                KnuthThread t = new KnuthThread(i * indexVal, (i * indexVal) -1);
+                t.start();
+
+                threads.add(t);
+            }
+            int[] currentBest = new int[] {0, 9999};
+            while (threads.size() > 0) {
+                int i = 0;
+                while (i < threads.size()) {
+                    if (!threads.get(i).isAlive()) {
+                        try {
+                            int[] temp1 = threads.get(i).getBest();
+                            if (temp1[1] < currentBest[1])
+                                currentBest = temp1;
+                            threads.get(i).join();
+                            threads.remove(i);
+                            i--;
+                        } catch (InterruptedException e) {
+                            throw new RuntimeException(e);
+                        }
+                    }
+                    i++;
+                }
+            }
+        }
+        //System.out.println(' ');
+        return guessNum;
+    }
+    //Initializes every possible instance of a Mastermind codeword and its corresponding color score
+    public static void initializeList(){
+        int Rt = 0;
+        for (int i = 0; i < COLOR_AMOUNT; i++){
+            for (int o = 0; o < COLOR_AMOUNT; o++){
+                for (int p = 0; p < COLOR_AMOUNT; p++){
+                    for (int w = 0; w < COLOR_AMOUNT; w++){
+                        int[] temp = new int[COLOR_AMOUNT];
+                        temp[i]++;
+                        temp[o]++;
+                        temp[p]++;
+                        temp[w]++;
+                        Reference.add(new Codeword( (i* 1000) + (o* 100) + (p * 10) + w, temp, Rt));
+                        Rt++;
+                    }
+                }
+            }
+        }
+        FIRST_GUESS = FirstGuessSetUp();
+    }
+
+    public class KnuthThread extends Thread
+    {
+        int startIndex, endIndex;
+        int finalans = 0;
+        int maxGuess = 99999;
+        ArrayList<Codeword> possibleAnswers;
+        KnuthThread(int i, int o){
+            startIndex = i;
+            endIndex = o;
+        }
+        @Override
+        public void run() {
+            int tempGuess = finalans;
             boolean bestIsPossible = false;
             int[] scores = new int[41];
             for (int i = 0; i < Reference.size(); i++){
@@ -249,29 +280,43 @@ public class MastermindSolver {
             //if (!bestIsPossible){
             //    System.out.print('*');
             //}
-            Guess = tempGuess;
+            finalans = tempGuess;
         }
-        //System.out.println(' ');
-        return guessNum;
-    }
-    //Initializes every possible instance of a Mastermind codeword and its corresponding color score
-    public static void initializeList(){
-        int Rt = 0;
-        for (int i = 0; i < COLOR_AMOUNT; i++){
-            for (int o = 0; o < COLOR_AMOUNT; o++){
-                for (int p = 0; p < COLOR_AMOUNT; p++){
-                    for (int w = 0; w < COLOR_AMOUNT; w++){
-                        int[] temp = new int[COLOR_AMOUNT];
-                        temp[i]++;
-                        temp[o]++;
-                        temp[p]++;
-                        temp[w]++;
-                        Reference.add(new Codeword( (i* 1000) + (o* 100) + (p * 10) + w, temp, Rt));
-                        Rt++;
-                    }
-                }
-            }
+        public int[] getBest(){
+            return new int[] {finalans, maxGuess};
         }
-        FIRST_GUESS = FirstGuessSetUp();
     }
+}
+class
+class Codeword
+{
+    private int codeword = 0;
+    private int[] colors = new int[MastermindSolver.COLOR_AMOUNT];
+    private int index = 0;
+    public void setCodeword(int Codewords, int[] Colors, int INDEX)
+    {
+        codeword = Codewords;
+        colors = Colors.clone();
+        index = INDEX;
+    }
+    public void setCodeword(Codeword code){
+        codeword = code.getCodeword();
+        colors = code.getColors();
+        index = code.getIndex();
+    }
+    Codeword (int temp, int[] Colors, int INDEX)
+    {
+        codeword = temp;
+        colors = Colors.clone();
+        index = INDEX;
+    }
+    Codeword (Codeword code) {
+        codeword = code.getCodeword();
+        colors = code.getColors();
+        index = code.getIndex();
+    }
+    Codeword(){}
+    public int getCodeword(){ return codeword; }
+    public int [] getColors(){ return colors; }
+    public int getIndex(){return index;}
 }
