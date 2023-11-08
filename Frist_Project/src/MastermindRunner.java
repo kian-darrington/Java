@@ -12,7 +12,7 @@ public class MastermindRunner {
         int guessNum = 0;
         int timesRan = 0;
         MastermindSolver m = new MastermindSolver();
-        /*Clock clock = Clock.systemDefaultZone();
+        Clock clock = Clock.systemDefaultZone();
         long startTime = clock.millis();
         for (int i = 0; i < COLOR_AMOUNT; i++){
             for (int o = 0; o < COLOR_AMOUNT; o++){
@@ -26,7 +26,7 @@ public class MastermindRunner {
             }
         }
 
-        System.out.println("It took " + (double)guessNum / (double)timesRan + " times and " + (clock.millis() - startTime) + " millis");*/
+        System.out.println("It took " + (double)guessNum / (double)timesRan + " times and " + (clock.millis() - startTime) + " millis");
         /*while (true) {
             String guess = console.nextLine();
             guessNum = m.knuthGuess(guess);

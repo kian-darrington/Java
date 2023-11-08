@@ -8,10 +8,10 @@ import java.util.function.Predicate;
 public class MastermindSolver {
     private static class Codeword
     {
-        private byte[] codeword = new byte[NUMBER_LENGTH];
+        private int codeword = 0;
         private int[] colors = new int[COLOR_AMOUNT];
         private int index = 0;
-        public void setCodeword(byte[] Codewords, int[] Colors, int INDEX)
+        public void setCodeword(int Codewords, int[] Colors, int INDEX)
         {
             codeword = Codewords;
             colors = Colors.clone();
@@ -22,7 +22,7 @@ public class MastermindSolver {
             colors = code.getColors();
             index = code.getIndex();
         }
-        Codeword (byte[] temp, int[] Colors, int INDEX)
+        Codeword (int temp, int[] Colors, int INDEX)
         {
             codeword = temp;
             colors = Colors.clone();
@@ -34,28 +34,30 @@ public class MastermindSolver {
             index = code.getIndex();
         }
         Codeword(){}
-        public byte[] getCodeword(){ return codeword; }
+        public int getCodeword(){ return codeword; }
         public int [] getColors(){ return colors; }
-        public int codeDigit(int index){return codeword[index];}
+        public int codeDigit(int index){return placeReturn(codeword, index);}
         public int getIndex(){return index;}
-        public String toString() {return Arrays.toString(codeword);}
     }
     public static final int NUMBER_LENGTH = 4;
     public static final int COLOR_AMOUNT = 6;
     public static int FirstGuessSetUp(){
-        byte[] temp = new byte[NUMBER_LENGTH];
+        int temp = 0;
         for (int i = 0; i < NUMBER_LENGTH; i++) {
-            if (NUMBER_LENGTH / i >= 2){
-                temp[i]++;
-            }
+            if (i >= NUMBER_LENGTH / 2)
+            {temp *= 10; temp++;}
         }
         return IndexFinder(temp);
     }
-    public static int IndexFinder(byte[] temp)
+    static int placeReturn(int code, int place)
+    {
+        return code % (int)Math.pow(10, place + 1) / (int)Math.pow(10, place);
+    }
+    public static int IndexFinder(int temp)
     {
         int index = 0;
         for (int i = 0; i < NUMBER_LENGTH; i++){
-            index += temp[i] * (int) Math.pow(COLOR_AMOUNT, i);
+            index += placeReturn(temp, i) * (int) Math.pow(COLOR_AMOUNT, i);
         }
         return index;
     }
@@ -255,20 +257,20 @@ public class MastermindSolver {
     //Initializes every possible instance of a Mastermind codeword and its corresponding color score
     public static void initializeList(){
         int Rt = 0;
-        for (int i = 0; i < Math.pow(COLOR_AMOUNT, NUMBER_LENGTH); i++){
-            int[] colors = new int[COLOR_AMOUNT + 1];
-            byte[] temp = new byte[NUMBER_LENGTH];
-            int index = (int)Math.pow(COLOR_AMOUNT, NUMBER_LENGTH - 1);
-            int tracker = 0;
-            while (index > 0){
-                temp[tracker] = (byte)(i / index);
-                index /= COLOR_AMOUNT;
-                tracker++;
+        for (int i = 0; i < COLOR_AMOUNT; i++){
+            for (int o = 0; o < COLOR_AMOUNT; o++){
+                for (int p = 0; p < COLOR_AMOUNT; p++){
+                    for (int w = 0; w < COLOR_AMOUNT; w++){
+                        int[] temp = new int[COLOR_AMOUNT];
+                        temp[i]++;
+                        temp[o]++;
+                        temp[p]++;
+                        temp[w]++;
+                        Reference.add(new Codeword( (i* 1000) + (o* 100) + (p * 10) + w, temp, Rt));
+                        Rt++;
+                    }
+                }
             }
-            for (int o = 0; o < temp.length; o++)
-                colors[temp[o]]++;
-            Reference.add(new Codeword(temp, colors, i));
-            System.out.println(Reference.get(i) + " " + i);
         }
         FIRST_GUESS = FirstGuessSetUp();
     }
