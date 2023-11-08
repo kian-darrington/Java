@@ -166,7 +166,6 @@ public class MastermindSolver {
         while (true) {
             guessNum++;
 
-            //System.out.println(Guess);
             if (Guess == Answer)
                 break;
 
@@ -178,71 +177,8 @@ public class MastermindSolver {
             possibleAnswers.removeIf(codeword -> scoreCodewords(temp, codeword) != FirstAns);
 
             //This begins the prediction of which guesses will limit the future list of possible answers the most
-            ArrayList<KnuthThread> threads = new ArrayList<>();
-            int indexVal = (int) Math.pow(COLOR_AMOUNT, NUMBER_LENGTH - 1);
-            for (int i = 0; i < COLOR_AMOUNT; i++) {
-                KnuthThread t = new KnuthThread(i * indexVal, (i * indexVal) -1);
-                t.start();
-
-                threads.add(t);
-            }
-            int[] currentBest = new int[] {0, 9999};
-            while (threads.size() > 0) {
-                int i = 0;
-                while (i < threads.size()) {
-                    if (!threads.get(i).isAlive()) {
-                        try {
-                            int[] temp1 = threads.get(i).getBest();
-                            if (temp1[1] < currentBest[1])
-                                currentBest = temp1;
-                            threads.get(i).join();
-                            threads.remove(i);
-                            i--;
-                        } catch (InterruptedException e) {
-                            throw new RuntimeException(e);
-                        }
-                    }
-                    i++;
-                }
-            }
-        }
-        //System.out.println(' ');
-        return guessNum;
-    }
-    //Initializes every possible instance of a Mastermind codeword and its corresponding color score
-    public static void initializeList(){
-        int Rt = 0;
-        for (int i = 0; i < COLOR_AMOUNT; i++){
-            for (int o = 0; o < COLOR_AMOUNT; o++){
-                for (int p = 0; p < COLOR_AMOUNT; p++){
-                    for (int w = 0; w < COLOR_AMOUNT; w++){
-                        int[] temp = new int[COLOR_AMOUNT];
-                        temp[i]++;
-                        temp[o]++;
-                        temp[p]++;
-                        temp[w]++;
-                        Reference.add(new Codeword( (i* 1000) + (o* 100) + (p * 10) + w, temp, Rt));
-                        Rt++;
-                    }
-                }
-            }
-        }
-        FIRST_GUESS = FirstGuessSetUp();
-    }
-
-    public class KnuthThread extends Thread
-    {
-        int startIndex, endIndex;
-        int finalans = 0;
-        int maxGuess = 99999;
-        ArrayList<Codeword> possibleAnswers;
-        KnuthThread(int i, int o){
-            startIndex = i;
-            endIndex = o;
-        }
-        @Override
-        public void run() {
-            int tempGuess = finalans;
+            int maxGuess = 99999;
+            int tempGuess = Guess;
             boolean bestIsPossible = false;
             int[] scores = new int[41];
             for (int i = 0; i < Reference.size(); i++){
@@ -280,14 +216,157 @@ public class MastermindSolver {
             //if (!bestIsPossible){
             //    System.out.print('*');
             //}
+            Guess = tempGuess;
+        }
+        //System.out.println(' ');
+        return guessNum;
+    }
+    public int multiKnuthGuess(String answer) {
+        int guessNum = 0;
+
+        int Answer = IndexFinder(answer);
+
+        int Guess = FIRST_GUESS;
+
+        ArrayList<Codeword> possibleAnswers = new ArrayList<>(Reference);
+
+        while (true) {
+            guessNum++;
+
+            //System.out.println(Guess);
+            if (Guess == Answer)
+                break;
+
+            int FirstAns = scoreCodewords(Guess, Answer);
+
+            //This goes through all available answers scores and compares them to the existing guess score
+            //If the score is different (the possible codeword is not a possible secret as verified through answer-guess symmetry) it will be removed
+            Codeword temp = new Codeword(Reference.get(Guess));
+            possibleAnswers.removeIf(codeword -> scoreCodewords(temp, codeword) != FirstAns);
+
+            //This is a multithreaded version of the Knuth future answer reduction system
+            ArrayList<KnuthThread> threads = new ArrayList<>();
+            int indexVal = (int) Math.pow(COLOR_AMOUNT, NUMBER_LENGTH - 1);
+            for (int i = 0; i < COLOR_AMOUNT; i++) {
+                KnuthThread t = new KnuthThread(i * indexVal, (i + 1) * indexVal, possibleAnswers);
+                t.start();
+
+                threads.add(t);
+            }
+            CodeInfo currentBest = new CodeInfo(0, 99999, false);
+            for (int i = 0; i < COLOR_AMOUNT; i++){
+                try {
+                    threads.get(i).join();
+                } catch (InterruptedException e) {
+                    throw new RuntimeException(e);
+                }
+                currentBest = currentBest.compareCodes(threads.get(i).getBest());
+            }
+            Guess = currentBest.index;
+        }
+        //System.out.println(' ');
+        return guessNum;
+    }
+    //Initializes every possible instance of a Mastermind codeword and its corresponding color score
+    public static void initializeList(){
+        int Rt = 0;
+        for (int i = 0; i < COLOR_AMOUNT; i++){
+            for (int o = 0; o < COLOR_AMOUNT; o++){
+                for (int p = 0; p < COLOR_AMOUNT; p++){
+                    for (int w = 0; w < COLOR_AMOUNT; w++){
+                        int[] temp = new int[COLOR_AMOUNT];
+                        temp[i]++;
+                        temp[o]++;
+                        temp[p]++;
+                        temp[w]++;
+                        Reference.add(new Codeword( (i* 1000) + (o* 100) + (p * 10) + w, temp, Rt));
+                        Rt++;
+                    }
+                }
+            }
+        }
+        FIRST_GUESS = FirstGuessSetUp();
+    }
+
+    public class KnuthThread extends Thread
+    {
+        int startIndex, endIndex;
+        int finalans = 0;
+        int maxGuess = 99999;
+        boolean bestIsPossible = false;
+        ArrayList<Codeword> possibleAnswers;
+        KnuthThread(int i, int o, ArrayList<Codeword>PossibleAnswers){
+            startIndex = i;
+            endIndex = o;
+            possibleAnswers = PossibleAnswers;
+        }
+        @Override
+        public void run() {
+            int tempGuess = finalans;
+            int[] scores = new int[41];
+            for (int i = startIndex; i < endIndex; i++){
+                boolean inPossible = false;
+
+                //Scores a codeword from the reference list (current codeword) against the all possible answers list and saves them in the scores[]
+                for (Codeword possibleAnswer : possibleAnswers) {
+                    int score = scoreCodewords(Reference.get(i), possibleAnswer);
+                    scores[score]++;
+                }
+
+                //Checks to see if the codeword is in the possible answer list
+                inPossible = scores[40] == 1;
+
+                //The maximum element of the array is recorded as the worst case scenario
+                int currentMax = 0;
+                for (int o = 0; o < scores.length; o++){
+                    if (scores[o] > currentMax)
+                        currentMax = scores[o];
+                    scores[o] = 0;
+                }
+                //If the max of the current codeword is better than the max of the current best codeword, the best codeword will take precedent
+                if (currentMax < maxGuess){
+                    tempGuess = i;
+                    maxGuess = currentMax;
+                    bestIsPossible = inPossible;
+                }
+                //If the current codeword shares the max value of the best codeword, and the best is not in the possible answer lists
+                //Then it will be replaced by a possible answer (because it's better to guess a possible answer of course)
+                else if (currentMax == maxGuess && !bestIsPossible && inPossible) {
+                    tempGuess = i;
+                    bestIsPossible = inPossible;
+                }
+            }
+            //if (!bestIsPossible){
+            //    System.out.print('*');
+            //}
             finalans = tempGuess;
         }
-        public int[] getBest(){
-            return new int[] {finalans, maxGuess};
+        public CodeInfo getBest(){
+            return new CodeInfo(finalans, maxGuess, bestIsPossible);
         }
     }
 }
-class
+class CodeInfo{
+    int index, maxGuess;
+    boolean inPossible;
+    CodeInfo(int Index, int MaxGuess, boolean InPossible) {
+        index = Index;
+        maxGuess = MaxGuess;
+        inPossible = InPossible;
+    }
+    public CodeInfo compareCodes(CodeInfo code){
+        if (maxGuess < code.maxGuess)
+            return this;
+        else if (maxGuess > code.maxGuess)
+            return code;
+        else if (inPossible)
+            return this;
+        else if (code.inPossible)
+            return code;
+        else
+            return this;
+    }
+}
 class Codeword
 {
     private int codeword = 0;
