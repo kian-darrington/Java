@@ -221,6 +221,8 @@ public class MastermindSolver {
         //System.out.println(' ');
         return guessNum;
     }
+    //This function runs the same method of solving as the KnuthGuess function, however it uses multithreading
+    //This function takes roughly 4000 millis to run all 1296 possibilities, with the same guess rate of the KnuthGuess
     public int multiKnuthGuess(String answer) {
         int guessNum = 0;
 
@@ -245,14 +247,17 @@ public class MastermindSolver {
             possibleAnswers.removeIf(codeword -> scoreCodewords(temp, codeword) != FirstAns);
 
             //This is a multithreaded version of the Knuth future answer reduction system
+            //Creates a list of the threads
             ArrayList<KnuthThread> threads = new ArrayList<>();
             int indexVal = (int) Math.pow(COLOR_AMOUNT, NUMBER_LENGTH - 1);
+            //This initialized the threads
             for (int i = 0; i < COLOR_AMOUNT; i++) {
                 KnuthThread t = new KnuthThread(i * indexVal, (i + 1) * indexVal, possibleAnswers);
                 t.start();
 
                 threads.add(t);
             }
+            //This ends the threads and gets the best answer from each thread
             CodeInfo currentBest = new CodeInfo(0, 99999, false);
             for (int i = 0; i < COLOR_AMOUNT; i++){
                 try {
@@ -262,6 +267,7 @@ public class MastermindSolver {
                 }
                 currentBest = currentBest.compareCodes(threads.get(i).getBest());
             }
+            //The best answer is then put into Guess
             Guess = currentBest.index;
         }
         //System.out.println(' ');
@@ -274,7 +280,7 @@ public class MastermindSolver {
             for (int o = 0; o < COLOR_AMOUNT; o++){
                 for (int p = 0; p < COLOR_AMOUNT; p++){
                     for (int w = 0; w < COLOR_AMOUNT; w++){
-                        int[] temp = new int[COLOR_AMOUNT];
+                        byte[] temp = new byte[COLOR_AMOUNT];
                         temp[i]++;
                         temp[o]++;
                         temp[p]++;
@@ -291,7 +297,7 @@ public class MastermindSolver {
     public class KnuthThread extends Thread
     {
         int startIndex, endIndex;
-        int finalans = 0;
+        int finalAns = 0;
         int maxGuess = 99999;
         boolean bestIsPossible = false;
         ArrayList<Codeword> possibleAnswers;
@@ -302,7 +308,7 @@ public class MastermindSolver {
         }
         @Override
         public void run() {
-            int tempGuess = finalans;
+            int tempGuess = finalAns;
             int[] scores = new int[41];
             for (int i = startIndex; i < endIndex; i++){
                 boolean inPossible = false;
@@ -339,10 +345,10 @@ public class MastermindSolver {
             //if (!bestIsPossible){
             //    System.out.print('*');
             //}
-            finalans = tempGuess;
+            finalAns = tempGuess;
         }
         public CodeInfo getBest(){
-            return new CodeInfo(finalans, maxGuess, bestIsPossible);
+            return new CodeInfo(finalAns, maxGuess, bestIsPossible);
         }
     }
 }
@@ -370,9 +376,9 @@ class CodeInfo{
 class Codeword
 {
     private int codeword = 0;
-    private int[] colors = new int[MastermindSolver.COLOR_AMOUNT];
+    private byte[] colors = new byte[MastermindSolver.COLOR_AMOUNT];
     private int index = 0;
-    public void setCodeword(int Codewords, int[] Colors, int INDEX)
+    public void setCodeword(int Codewords, byte[] Colors, int INDEX)
     {
         codeword = Codewords;
         colors = Colors.clone();
@@ -383,7 +389,7 @@ class Codeword
         colors = code.getColors();
         index = code.getIndex();
     }
-    Codeword (int temp, int[] Colors, int INDEX)
+    Codeword (int temp, byte[] Colors, int INDEX)
     {
         codeword = temp;
         colors = Colors.clone();
@@ -396,6 +402,6 @@ class Codeword
     }
     Codeword(){}
     public int getCodeword(){ return codeword; }
-    public int [] getColors(){ return colors; }
+    public byte [] getColors(){ return colors; }
     public int getIndex(){return index;}
 }
