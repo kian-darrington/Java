@@ -74,8 +74,7 @@ public class Hangman {
         playGame(words);
     }
     //Allows for a user based game of hangman to be played until the user wants to stop
-    static void playGame(ArrayList<String> w){
-        ArrayList<String> words = getWords();
+    static void playGame(ArrayList<String> words){
         while (true){
             int guessNum = 0;
             int wrongNum = 0;

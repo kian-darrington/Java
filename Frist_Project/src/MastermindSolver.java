@@ -75,7 +75,7 @@ public class MastermindSolver {
     public int randGuess(String answer) {
         int guessNum = 0;
         int AnswerIndex = IndexFinder(answer);
-        ArrayList<Codeword> possibleAnswers = new ArrayList<>(Reference);
+        ArrayList<Codeword> possibleAnswers = new ArrayList<>();
         while (true) {
             guessNum++;
             int randNum = rand.nextInt(possibleAnswers.size());
