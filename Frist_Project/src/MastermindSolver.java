@@ -33,7 +33,7 @@ public class MastermindSolver {
         return index;
     }
     public static int FIRST_GUESS = 7;
-    public static ArrayList<Codeword> Reference = new ArrayList<>();
+    public static Codeword[] Reference = new Codeword[(int)Math.pow(COLOR_AMOUNT,NUMBER_LENGTH)];
     Random rand = new Random();
 
     MastermindSolver(){     initializeList();   }
@@ -69,7 +69,7 @@ public class MastermindSolver {
         return (blackPegs * 10) + matches - blackPegs;
     }
     public static int scoreCodewords(int i1, int i2){
-        return scoreCodewords(Reference.get(i1), Reference.get(i2));
+        return scoreCodewords(Reference[i1], Reference[i2]);
     }
     //Method of playing Mastermind that randomly selects from all possible solution each time (it's pretty bad)
     public int randGuess(String answer) {
@@ -100,7 +100,7 @@ public class MastermindSolver {
         int Guess = FIRST_GUESS;
 
         //copies the list of all possible codewords and the corresponding color codes
-        ArrayList<Codeword> possibleAnswers = new ArrayList<>(Reference);
+        ArrayList<Codeword> possibleAnswers = new ArrayList<>(Arrays.asList(Reference));
 
         while (true) {
             guessNum++;
@@ -111,7 +111,7 @@ public class MastermindSolver {
             int FirstAns = scoreCodewords(Guess, Answer);
 
             //This goes through either all available answers scores and compares them to the existing guess score to narrow the possibilities
-            Codeword temp = new Codeword(Reference.get(Guess));
+            Codeword temp = new Codeword(Reference[Guess]);
             possibleAnswers.removeIf(codeword -> scoreCodewords(temp, codeword) != FirstAns);
             Guess = IndexFinder(possibleAnswers.get(0).getCodeword());
             //System.out.println(Guess);
@@ -131,7 +131,7 @@ public class MastermindSolver {
         int Answer = IndexFinder(answer);
 
         //copies the list of all possible codewords and the corresponding color codes
-        ArrayList<Codeword> possibleAnswers = new ArrayList<>(Reference);
+        ArrayList<Codeword> possibleAnswers = new ArrayList<>(Arrays.asList(Reference));
 
         while (true) {
             guessNum++;
@@ -143,7 +143,7 @@ public class MastermindSolver {
 
             //This goes through all available answers scores and compares them to the existing guess score
             //If the score is different (the possible codeword is not a possible secret as verified through answer-guess symmetry) it will be removed
-            Codeword temp = new Codeword(Reference.get(Guess));
+            Codeword temp = new Codeword(Reference[Guess]);
             possibleAnswers.removeIf(codeword -> scoreCodewords(temp, codeword) != FirstAns);
             Guess = IndexFinder(possibleAnswers.get(rand.nextInt(possibleAnswers.size())).getCodeword());
             //System.out.println(Guess);
@@ -161,7 +161,7 @@ public class MastermindSolver {
 
         int Guess = FIRST_GUESS;
 
-        ArrayList<Codeword> possibleAnswers = new ArrayList<>(Reference);
+        ArrayList<Codeword> possibleAnswers = new ArrayList<>(Arrays.asList(Reference));
 
         while (true) {
             guessNum++;
@@ -173,7 +173,7 @@ public class MastermindSolver {
 
             //This goes through all available answers scores and compares them to the existing guess score
             //If the score is different (the possible codeword is not a possible secret as verified through answer-guess symmetry) it will be removed
-            Codeword temp = new Codeword(Reference.get(Guess));
+            Codeword temp = new Codeword(Reference[Guess]);
             possibleAnswers.removeIf(codeword -> scoreCodewords(temp, codeword) != FirstAns);
 
             //This begins the prediction of which guesses will limit the future list of possible answers the most
@@ -181,12 +181,12 @@ public class MastermindSolver {
             int tempGuess = Guess;
             boolean bestIsPossible = false;
             int[] scores = new int[41];
-            for (int i = 0; i < Reference.size(); i++){
+            for (int i = 0; i < Reference.length; i++){
                 boolean inPossible = false;
 
                 //Scores a codeword from the reference list (current codeword) against the all possible answers list and saves them in the scores[]
                 for (Codeword possibleAnswer : possibleAnswers) {
-                    int score = scoreCodewords(Reference.get(i), possibleAnswer);
+                    int score = scoreCodewords(Reference[i], possibleAnswer);
                     scores[score]++;
                 }
 
@@ -230,7 +230,7 @@ public class MastermindSolver {
 
         int Guess = FIRST_GUESS;
 
-        ArrayList<Codeword> possibleAnswers = new ArrayList<>(Reference);
+        ArrayList<Codeword> possibleAnswers = new ArrayList<>(Arrays.asList(Reference));
 
         while (true) {
             guessNum++;
@@ -243,7 +243,7 @@ public class MastermindSolver {
 
             //This goes through all available answers scores and compares them to the existing guess score
             //If the score is different (the possible codeword is not a possible secret as verified through answer-guess symmetry) it will be removed
-            Codeword temp = new Codeword(Reference.get(Guess));
+            Codeword temp = new Codeword(Reference[Guess]);
             possibleAnswers.removeIf(codeword -> scoreCodewords(temp, codeword) != FirstAns);
 
             //This is a multithreaded version of the Knuth future answer reduction system
@@ -285,7 +285,7 @@ public class MastermindSolver {
                         temp[o]++;
                         temp[p]++;
                         temp[w]++;
-                        Reference.add(new Codeword( (i* 1000) + (o* 100) + (p * 10) + w, temp, Rt));
+                        Reference[Rt] = new Codeword( (i* 1000) + (o* 100) + (p * 10) + w, temp, Rt);
                         Rt++;
                     }
                 }
@@ -293,7 +293,7 @@ public class MastermindSolver {
         }
         FIRST_GUESS = FirstGuessSetUp();
     }
-
+// Thread for multithreading, takes a chunk of the whole list and spits out its best answer
     public class KnuthThread extends Thread
     {
         int startIndex, endIndex;
@@ -306,6 +306,7 @@ public class MastermindSolver {
             endIndex = o;
             possibleAnswers = PossibleAnswers;
         }
+        //The actual thread stuff
         @Override
         public void run() {
             int tempGuess = finalAns;
@@ -315,7 +316,7 @@ public class MastermindSolver {
 
                 //Scores a codeword from the reference list (current codeword) against the all possible answers list and saves them in the scores[]
                 for (Codeword possibleAnswer : possibleAnswers) {
-                    int score = scoreCodewords(Reference.get(i), possibleAnswer);
+                    int score = scoreCodewords(Reference[i], possibleAnswer);
                     scores[score]++;
                 }
 
@@ -352,6 +353,7 @@ public class MastermindSolver {
         }
     }
 }
+//Created this class so that my thread could return it
 class CodeInfo{
     int index, maxGuess;
     boolean inPossible;

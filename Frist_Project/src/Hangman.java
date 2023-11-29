@@ -2,12 +2,14 @@ import java.util.*;
 import java.io.*;
 //Created by Kian Darrington for the purpose of playing a good game of hangman
 //This class administers the game of Hangman, allowing for 7 total wrong guesses
+//I believe this is project 3
 public class Hangman {
     //Constant for the number of Guesses
     public static final int MAX_GUESS = 6;
     //This function prints the gallows based off of the number of wrong guesses
     final static Random rand = new Random();
     final static Scanner console = new Scanner(System.in);
+    //A spaghetti esq function that I wrote because I was too lazy to write more concise code (it makes sense though)
     public static void printGallows(int errors, String letters)
     {
         if (errors < 1) {
@@ -25,6 +27,9 @@ public class Hangman {
             System.out.println(" |       | ");
             System.out.println(" |       o ");
         }
+        if (errors > 3)
+            System.out.println(" |      /|\\");
+
         switch (errors) {
             case 1:
                 System.out.println(" |         ");
@@ -39,15 +44,12 @@ public class Hangman {
                 System.out.println(" |         ");
                 break;
             case 4:
-                System.out.println(" |      /|\\");
                 System.out.println(" |         ");
                 break;
             case 5:
-                System.out.println(" |      /|\\");
                 System.out.println(" |      /  ");
                 break;
             case 6:
-                System.out.println(" |      /|\\");
                 System.out.println(" |      / \\");
                 break;
         }
@@ -68,7 +70,7 @@ public class Hangman {
         }
         return words;
     }
-    //Main
+    //Main, runs the playing function
     public static void main(String[] args) {
         ArrayList<String> words = getWords();
         playGame(words);
@@ -78,19 +80,19 @@ public class Hangman {
         while (true){
             int guessNum = 0;
             int wrongNum = 0;
-
+            //Selects random word
             String answer = words.get(rand.nextInt(words.size()));
-
+            //Create the array that tracks the revealed Letters
             boolean[] revealedLetters = new boolean[answer.length()];
             boolean hasWon = false;
-
+            //Keeps track of what the user has already guessed, as well as the incorrect letters
             StringBuilder wrongLetters = new StringBuilder();
             StringBuilder allLetters = new StringBuilder();
-
+            //Initiates the game
             while (true) {
                 if (wrongNum > MAX_GUESS)
                     break;
-                //sets up the visual hangman
+                //Sets up the visual hangman
                 printGallows(wrongNum, wrongLetters.toString().toUpperCase());
                 //This prints the dashed lines of the unknown word, as well as the revealed letters in their proper place
                 //Ex: B _ L L _ _ N for Balloon if the user has guesses have B, L, and N
@@ -100,7 +102,7 @@ public class Hangman {
                     else
                         System.out.print("" + answer.toUpperCase().charAt(i) + ' ');
                 }
-                //Win check
+                //Win check to see if all letters have been guessed
                 hasWon = true;
                 for (boolean t : revealedLetters){
                     if (!t) {
@@ -119,7 +121,7 @@ public class Hangman {
                     System.out.print("Guess: ");
                     guess = console.nextLine().toLowerCase().charAt(0);
                 }
-
+                //Adds the guess to the total guess list
                 allLetters.append(guess);
                 guessNum++;
                 wrongNum++;
@@ -129,6 +131,7 @@ public class Hangman {
                 for (int i = 0; i < answer.length(); i++)
                     if (guess == answer.charAt(i))
                         revealedLetters[i] = true;
+                //If the old Boolean array is different then the new boolean array, it adjusts the error counter because a letter has been guessed
                 if (Arrays.toString(revealedLetters).compareTo(Arrays.toString(prev)) != 0)
                     wrongNum--;
                 else
