@@ -8,6 +8,7 @@ import java.util.function.Predicate;
 public class MastermindSolver {
     public static final int NUMBER_LENGTH = 4;
     public static final int COLOR_AMOUNT = 6;
+    //Sets up the first guess for all types of games
     public static int FirstGuessSetUp(){
         int temp = 0;
         for (int i = 0; i < NUMBER_LENGTH; i++) {
@@ -16,6 +17,7 @@ public class MastermindSolver {
         }
         return IndexFinder(temp);
     }
+    //Returns the corresponding index to reference, of inputted codeword
     public static int IndexFinder(int temp)
     {
         int index = 0;
@@ -41,11 +43,19 @@ public class MastermindSolver {
     //Counts the number of the colors in a codeword, and situates them in the appropriate order in an int[]
     //For example, the codeword 4431 returns { 0, 1, 0, 1, 2, 0 },
     //with the total sum of the array adding up to the number of pins (4)
-    public static int[] colorChecker(String str)
+    public static byte[] colorChecker(String str)
     {
-        int[] colorCount = new int[COLOR_AMOUNT];
+        byte[] colorCount = new byte[COLOR_AMOUNT];
         for (int i = 0; i < str.length(); i++){
             colorCount[Character.getNumericValue(str.charAt(i))]++;
+        }
+        return colorCount;
+    }
+    public static byte[] colorChecker(int temp){
+        byte[] colorCount = new byte[COLOR_AMOUNT];
+        for (int i = 0; i < NUMBER_LENGTH; i++){
+            colorCount[temp % 10]++;
+            temp /= 10;
         }
         return colorCount;
     }
@@ -275,26 +285,14 @@ public class MastermindSolver {
     }
     //Initializes every possible instance of a Mastermind codeword and its corresponding color score
     public static void initializeList(){
-        int Rt = 0;
-        for (int i = 0; i < COLOR_AMOUNT; i++){
-            for (int o = 0; o < COLOR_AMOUNT; o++){
-                for (int p = 0; p < COLOR_AMOUNT; p++){
-                    for (int w = 0; w < COLOR_AMOUNT; w++){
-                        byte[] temp = new byte[COLOR_AMOUNT];
-                        temp[i]++;
-                        temp[o]++;
-                        temp[p]++;
-                        temp[w]++;
-                        Reference[Rt] = new Codeword( (i* 1000) + (o* 100) + (p * 10) + w, temp, Rt);
-                        Rt++;
-                    }
-                }
-            }
+        for (int i = 0; i < (int)Math.pow(COLOR_AMOUNT, NUMBER_LENGTH); i++){
+            int word = Integer.parseInt(Integer.toString(i, COLOR_AMOUNT));
+            Reference[i] = new Codeword(word, colorChecker(word), i);
         }
         FIRST_GUESS = FirstGuessSetUp();
     }
 // Thread for multithreading, takes a chunk of the whole list and spits out its best answer
-    public class KnuthThread extends Thread
+    public static class KnuthThread extends Thread
     {
         int startIndex, endIndex;
         int finalAns = 0;

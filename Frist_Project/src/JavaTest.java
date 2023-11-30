@@ -29,9 +29,19 @@ public class JavaTest {
         else
             return s.append(reverse(e, i - 1)).toString();
     }
+    public static int CodewordFinder(int index){
+        int temp = 0;
+        for (int i = 0; i < 4 ; i++){
+            temp += (temp % 6) * (int) Math.pow(10, i);
+            index /= 6;
+        }
+        return temp;
+    }
     public static void main(String[] args) {
         Scanner console = new Scanner(System.in);
-        int num = console.nextInt();
-        System.out.println(writeBinary(num));
+        while (true) {
+            int num = console.nextInt();
+            System.out.println(Integer.toString(num, 6));
+        }
     }
 }
