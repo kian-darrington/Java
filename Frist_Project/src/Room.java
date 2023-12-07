@@ -6,8 +6,9 @@ public class Room {
     int yCord;
     boolean onPath, canPath, isExit;
     public static final int N = 0, E = 1, S = 2, W = 3;
-    boolean[] canMove = new boolean[4];
     //True or false for N, E, S, W
+    boolean[] canMove = new boolean[4];
+    Room(){ reset(); }
     Room(int x, int y, boolean[] t)
     {
         xCord = x;
@@ -59,5 +60,14 @@ public class Room {
                 num++;
         return num;
     }
+    public String toString(){
+        if (isExit)
+            return "F";
+        else if (xCord == 0 && yCord == 0)
+            return "S";
+        else
+            return " ";
+    }
     public boolean[] getMove() { return canMove; }
+    public boolean getMove(int direction) { return canMove[direction]; }
 }

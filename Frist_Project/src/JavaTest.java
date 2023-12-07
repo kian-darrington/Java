@@ -39,9 +39,6 @@ public class JavaTest {
     }
     public static void main(String[] args) {
         Scanner console = new Scanner(System.in);
-        while (true) {
-            int num = console.nextInt();
-            System.out.println(Integer.toString(num, 6));
-        }
+        System.out.println(MazeMaker.block);
     }
 }

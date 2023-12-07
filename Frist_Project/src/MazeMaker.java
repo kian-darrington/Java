@@ -6,16 +6,17 @@ public class MazeMaker {
     public static int Y_ROOMS = 4;
     private static final Random rand = new Random();
     //The maze as a 2D array of rooms
-    private static Room[][] rooms = null;
+    private static Room[][] rooms = new Room[X_ROOMS][Y_ROOMS];
     //For the sake of my poor brain
     public static final int N = 0, E = 1, S = 2, W = 3;
+    public static final char block = 0x2588;
 
     //Gives the rooms the information they need to know about themselves
     void setUpRooms(){
         for(int i =0; i < X_ROOMS; i++){
             for (int o = 0; o < Y_ROOMS; o++){
+                rooms[i][o] = new Room();
                 rooms[i][o].setCord(i, o);
-                rooms[i][o].reset();
             }
         }
     }
@@ -62,18 +63,61 @@ public class MazeMaker {
         makePath();
         return rooms;
     }
-
-    void makePath(){
+    void randSetExit(){
         int exit = 0;
-        do {
+        while (exit == 0)
             exit = rand.nextInt(X_ROOMS * 2 + ((Y_ROOMS - 2) * 2));
-        } while (exit == 0);
         if (exit < X_ROOMS)
             rooms[exit][0].setExit(true);
-        else if (exit < X_ROOMS + Y_ROOMS - 2)
-            rooms[X_ROOMS - 1][Y_ROOMS].setExit(true);
+        else if (exit < X_ROOMS + Y_ROOMS - 1)
+            rooms[X_ROOMS - 1][1 + exit - X_ROOMS].setExit(true);
+        else
+            exit -= X_ROOMS + Y_ROOMS - 2;
+        if (exit < X_ROOMS - 2)
+            rooms[exit][Y_ROOMS -1].setExit(true);
+        else
+            rooms[0][exit - (X_ROOMS - 3)].setExit(true);
     }
+    void makePath(){
+        randSetExit();
 
+    }
+    public void printMaze(){
+        for (int i = 0; i < Y_ROOMS * 2 + 1; i++){
+            for (int o = 0; o < X_ROOMS * 2 + 1; o++){
+                if (!(o % 2 != 0 || i % 2 != 0))
+                    System.out.print(block);
+                else if (o % 2 == 1 && i % 2 == 1)
+                    System.out.print(rooms[o / 2][i / 2]);
+                else{
+                    if (i % 2 == 0)
+                        System.out.print(upDownCheck(o /2, i / 2));
+                    else if (o % 2 == 0){
+                        System.out.print(sideSideCheck(o /2, i / 2));
+                    }
+                }
+            }
+            System.out.println();
+        }
+    }
+    char upDownCheck(int x, int y){
+        if (y == 0)
+            return block;
+        else if (y == Y_ROOMS)
+            return block;
+        else if (!(!rooms[x][y].getMove(N) || !rooms[x][y + 1].getMove(S)))
+            return ' ';
+        else
+            return block;
+    }
+    char sideSideCheck(int x, int y){
+        if (x == X_ROOMS - 1)
+            return block;
+        else if (!(!rooms[x][y].getMove(E) || !rooms[x + 1][y].getMove(W)))
+            return ' ';
+        else
+            return block;
+    }
     public Room[][] getMaze(){
         return rooms;
     }
