@@ -71,16 +71,21 @@ public class MazeMaker {
             rooms[exit][0].setExit(true);
         else if (exit < X_ROOMS + Y_ROOMS - 1)
             rooms[X_ROOMS - 1][1 + exit - X_ROOMS].setExit(true);
-        else
+        else {
             exit -= X_ROOMS + Y_ROOMS - 2;
-        if (exit < X_ROOMS - 2)
-            rooms[exit][Y_ROOMS -1].setExit(true);
-        else
-            rooms[0][exit - (X_ROOMS - 3)].setExit(true);
+            if (exit < X_ROOMS - 2)
+                rooms[exit][Y_ROOMS - 1].setExit(true);
+            else
+                rooms[0][exit - (X_ROOMS - 3)].setExit(true);
+        }
     }
     void makePath(){
         randSetExit();
-
+        for (int i = 0; i < rooms.length; i++){
+            for (int o = 0; o < rooms[i].length; o++){
+                rooms[i][o].changeMove(new boolean[] {true, true, true, true});
+            }
+        }
     }
     public void printMaze(){
         for (int i = 0; i < Y_ROOMS * 2 + 1; i++){
@@ -103,7 +108,7 @@ public class MazeMaker {
     char upDownCheck(int x, int y){
         if (y == 0)
             return block;
-        else if (y == Y_ROOMS)
+        else if (y == Y_ROOMS || y == Y_ROOMS - 1)
             return block;
         else if (!(!rooms[x][y].getMove(N) || !rooms[x][y + 1].getMove(S)))
             return ' ';
@@ -111,8 +116,14 @@ public class MazeMaker {
             return block;
     }
     char sideSideCheck(int x, int y){
-        if (x == X_ROOMS - 1)
+        if (x == X_ROOMS)
             return block;
+        else if (x == X_ROOMS - 1) {
+            if (rooms[x][y].getMove(W))
+                return ' ';
+            else
+                return block;
+        }
         else if (!(!rooms[x][y].getMove(E) || !rooms[x + 1][y].getMove(W)))
             return ' ';
         else
