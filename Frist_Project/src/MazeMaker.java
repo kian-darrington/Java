@@ -124,7 +124,7 @@ public class MazeMaker {
             else
                 return block;
         }
-        else if (!(!rooms[x][y].getMove(E) || !rooms[x + 1][y].getMove(W)))
+        else if (rooms[x][y].getMove(E) && rooms[x + 1][y].getMove(W))
             return ' ';
         else
             return block;
