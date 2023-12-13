@@ -6,6 +6,10 @@ public class Room {
     int yCord;
     boolean onPath, canPath, isExit;
     public static final int N = 0, E = 1, S = 2, W = 3;
+
+    // seelct * from user_table where firstname = "mike"; drop user_table; "x";
+
+
     //True or false for N, E, S, W
     boolean[] canMove = new boolean[4];
     Room(){ reset(); }
@@ -22,18 +26,18 @@ public class Room {
     void edgeCheck()
     {
         if (xCord == 0) {
-            canMove[E] = false;
+            canMove[W] = false;
             numMove--;
         }
-        else if (xCord == X_ROOM -1) {
-            canMove[W] = false;
+        if (xCord == X_ROOM -1) {
+            canMove[E] = false;
             numMove--;
         }
         if (yCord == 0) {
             canMove[N] = false;
             numMove--;
         }
-        else if (yCord == Y_ROOM -1) {
+        if (yCord == Y_ROOM -1) {
             canMove[S] = false;
             numMove--;
         }
@@ -47,6 +51,7 @@ public class Room {
         edgeCheck();
     }
     void setExit(boolean t) { isExit = t; }
+    boolean getExit(){return isExit;}
     void reset(){
         canMove = new boolean[] {false, false, false, false};
         onPath = false;
@@ -66,7 +71,7 @@ public class Room {
         else if (xCord == 0 && yCord == 0)
             return "S";
         else
-            return " ";
+            return "R";
     }
     public boolean[] getMove() { return canMove; }
     public boolean getMove(int direction) { return canMove[direction]; }

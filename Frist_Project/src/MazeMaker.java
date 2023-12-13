@@ -64,26 +64,55 @@ public class MazeMaker {
         return rooms;
     }
     void randSetExit(){
-        int exit = 0;
-        while (exit == 0)
-            exit = rand.nextInt(X_ROOMS * 2 + ((Y_ROOMS - 2) * 2));
-        if (exit < X_ROOMS)
-            rooms[exit][0].setExit(true);
-        else if (exit < X_ROOMS + Y_ROOMS - 1)
-            rooms[X_ROOMS - 1][1 + exit - X_ROOMS].setExit(true);
-        else {
-            exit -= X_ROOMS + Y_ROOMS - 2;
-            if (exit < X_ROOMS - 2)
-                rooms[exit][Y_ROOMS - 1].setExit(true);
-            else
-                rooms[0][exit - (X_ROOMS - 3)].setExit(true);
-        }
+        int exitCount = 0;
+        do {
+            exitCount = 0;
+            int exit = 0;
+            while (exit == 0)
+                exit = rand.nextInt(X_ROOMS * 2 + ((Y_ROOMS - 2) * 2));
+            if (exit < X_ROOMS)
+                rooms[exit][0].setExit(true);
+            else if (exit < X_ROOMS + Y_ROOMS - 1)
+                rooms[X_ROOMS - 1][1 + exit - X_ROOMS].setExit(true);
+            else {
+                exit -= X_ROOMS + Y_ROOMS - 2;
+                if (exit < X_ROOMS - 2)
+                    rooms[exit][Y_ROOMS - 1].setExit(true);
+                else
+                    rooms[0][exit - (X_ROOMS - 2)].setExit(true);
+            }
+            //Error check for multiple exits and if the Start is the exit
+            boolean hasExit = false;
+            for (Room[] r : rooms){
+                for (Room room : r){
+                    if (room.getExit()){
+                        if (room.xCord !=0 || room.yCord != 0) {
+                            hasExit = true;
+                            if (exitCount > 0)
+                                room.setExit(false);
+                            exitCount++;
+                        }
+                        else {
+                            room.setExit(false);
+                        }
+                    }
+                }
+            }
+        } while (exitCount < 1);
     }
     void makePath(){
         randSetExit();
-        for (int i = 0; i < rooms.length; i++){
-            for (int o = 0; o < rooms[i].length; o++){
-                rooms[i][o].changeMove(new boolean[] {true, true, true, true});
+        boolean complete = false;
+        int x = 0, y = 0;
+        while (!complete){
+            int[] direction = new int[rooms[x][y].numMove()];
+            boolean[] temp = rooms[x][y].canMove;
+            int count = 0;
+            for (int i = 0; i < temp.length; i++){
+                if (temp[i]){
+                    direction[count] = i;
+                    count++;
+                }
             }
         }
     }
@@ -108,15 +137,23 @@ public class MazeMaker {
     char upDownCheck(int x, int y){
         if (y == 0)
             return block;
-        else if (y == Y_ROOMS || y == Y_ROOMS - 1)
+        else if (y == Y_ROOMS)
             return block;
-        else if (!(!rooms[x][y].getMove(N) || !rooms[x][y + 1].getMove(S)))
+        else if (y == Y_ROOMS - 1){
+            if (rooms[x][y].getMove(N))
+                return ' ';
+            else
+                return block;
+        }
+        else if (rooms[x][y].getMove(N) && rooms[x][y - 1].getMove(S))
             return ' ';
         else
             return block;
     }
     char sideSideCheck(int x, int y){
-        if (x == X_ROOMS)
+        if (x == 0)
+            return block;
+        else if (x == X_ROOMS)
             return block;
         else if (x == X_ROOMS - 1) {
             if (rooms[x][y].getMove(W))
