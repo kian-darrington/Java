@@ -1,3 +1,4 @@
+import java.util.Arrays;
 import java.util.Random;
 
 public class MazeMaker {
@@ -55,7 +56,6 @@ public class MazeMaker {
     }
 
     void changeMove(Room room){
-        rooms[room.xCord][room.yCord].changeMove(room.getMove());
         alterSurrounding(room);
     }
 
@@ -104,14 +104,62 @@ public class MazeMaker {
         randSetExit();
         boolean complete = false;
         int x = 0, y = 0;
-        while (!complete){
-            int[] direction = new int[rooms[x][y].numMove()];
-            boolean[] temp = rooms[x][y].canMove;
+        boolean[][] seenBefore = new boolean[X_ROOMS][Y_ROOMS];
+        while (!rooms[x][y].getExit()){
+            seenBefore[x][y] = true;
+            int[] direction = rooms[x][y].alterablePathsInt();
+            int moveTo = 0;
             int count = 0;
-            for (int i = 0; i < temp.length; i++){
-                if (temp[i]){
-                    direction[count] = i;
-                    count++;
+            while (true){
+                count++;
+                System.out.println(x + ' ' + y);
+                int tempX = x, tempY = y;
+                if (count > 12 || direction == null){
+                    int[] possible = rooms[x][y].getDirections();
+                    moveTo = possible[rand.nextInt(possible.length)];
+                    switch (moveTo) {
+                        case N:
+                            tempY--;
+                            break;
+                        case E:
+                            tempX++;
+                            break;
+                        case S:
+                            tempY++;
+                            break;
+                        case W:
+                            tempX--;
+                    }
+                    if (y < 0)
+                        continue;
+                    x = tempX;
+                    y = tempY;
+                    count = 0;
+                    break;
+                }
+                moveTo = direction[rand.nextInt(direction.length)];
+                switch (moveTo) {
+                    case N:
+                        tempY--;
+                        break;
+                    case E:
+                        tempX++;
+                        break;
+                    case S:
+                        tempY++;
+                        break;
+                    case W:
+                        tempX--;
+                }
+                if (!seenBefore[tempX][tempY]){
+                    if (y < 0)
+                        continue;
+                    rooms[x][y].changeMove(moveTo, true);
+                    alterSurrounding(rooms[x][y]);
+                    x = tempX;
+                    y = tempY;
+                    count = 0;
+                    break;
                 }
             }
         }
@@ -133,6 +181,12 @@ public class MazeMaker {
             }
             System.out.println();
         }
+        for (int i = 0; i < Y_ROOMS; i++){
+            for (int o = 0; o < X_ROOMS; o++) {
+                System.out.print(o + " " + i + " ");
+                System.out.println(Arrays.toString(rooms[o][i].canMove));
+            }
+            }
     }
     char upDownCheck(int x, int y){
         if (y == 0)

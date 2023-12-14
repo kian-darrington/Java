@@ -7,7 +7,7 @@ public class Room {
     boolean onPath, canPath, isExit;
     public static final int N = 0, E = 1, S = 2, W = 3;
 
-    // seelct * from user_table where firstname = "mike"; drop user_table; "x";
+    // select * from user_table where firstname = "mike"; drop user_table; "x";
 
 
     //True or false for N, E, S, W
@@ -25,6 +25,7 @@ public class Room {
     }
     void edgeCheck()
     {
+        numMove = 4;
         if (xCord == 0) {
             canMove[W] = false;
             numMove--;
@@ -41,6 +42,30 @@ public class Room {
             canMove[S] = false;
             numMove--;
         }
+    }
+    boolean[] alterablePaths(){
+        boolean[] directions = new boolean[] {true, true, true, true};
+        numMove = 4;
+        if (xCord == 0) {
+            directions[W] = false;
+            numMove--;
+        }
+        if (xCord == X_ROOM -1) {
+            directions[E] = false;
+            numMove--;
+        }
+        if (yCord == 0) {
+            directions[N] = false;
+            numMove--;
+        }
+        if (yCord == Y_ROOM -1) {
+            directions[S] = false;
+            numMove--;
+        }
+        for (int i = 0; i < directions.length; i++)
+            if (canMove[i])
+                directions[i] = false;
+        return directions;
     }
     void changeMove(boolean[] t){
         canMove = t;
@@ -65,6 +90,22 @@ public class Room {
                 num++;
         return num;
     }
+    public int[] alterablePathsInt(){
+        boolean[] temp = alterablePaths();
+        int trueNum = 0;
+        for (boolean t : temp)
+            if (t)
+                trueNum++;
+        int[] directions = new int[trueNum];
+        int count = 0;
+        for (int i = 0; i < temp.length; i++){
+            if (temp[i]) {
+                directions[count] = i;
+                count++;
+            }
+        }
+        return directions;
+    }
     public String toString(){
         if (isExit)
             return "F";
@@ -74,5 +115,14 @@ public class Room {
             return "R";
     }
     public boolean[] getMove() { return canMove; }
+    public int[] getDirections() {
+        int[] temp = new int[numMove];
+        int count = 0;
+        for (int i =0; i < canMove.length; i++){
+            if (canMove[i])
+                temp[count] = i;
+        }
+        return temp;
+    }
     public boolean getMove(int direction) { return canMove[direction]; }
 }
