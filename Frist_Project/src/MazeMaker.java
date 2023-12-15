@@ -32,9 +32,9 @@ public class MazeMaker {
         if (x < X_ROOMS - 1)
             rooms[x + 1][y].changeMove(W, temp[E]);
         if (y != 0)
-            rooms[x][y - 1].changeMove(N, temp[S]);
+            rooms[x][y - 1].changeMove(S, temp[N]);
         if (y < Y_ROOMS - 1)
-            rooms[x][y + 1].changeMove(S, temp[N]);
+            rooms[x][y + 1].changeMove(N, temp[S]);
     }
     void alterSurrounding(Room room, int direction){
         int x = room.xCord, y = room.yCord;
@@ -43,10 +43,10 @@ public class MazeMaker {
             rooms[x - 1][y].changeMove(E, temp[W]);
         if (x < X_ROOMS - 1 && direction == E)
             rooms[x + 1][y].changeMove(W, temp[E]);
-        if (y != 0 && direction == S)
-            rooms[x][y - 1].changeMove(N, temp[S]);
-        if (y < Y_ROOMS - 1 && direction == N)
-            rooms[x][y + 1].changeMove(S, temp[N]);
+        if (y < Y_ROOMS - 1 && direction == S)
+            rooms[x][y + 1].changeMove(N, temp[S]);
+        if (y != 0 && direction == N)
+            rooms[x][y - 1].changeMove(S, temp[N]);
     }
 
     void changeMove(Room room, int direction){
@@ -174,7 +174,7 @@ public class MazeMaker {
                 else{
                     if (i % 2 == 0)
                         System.out.print(upDownCheck(o /2, i / 2));
-                    else if (o % 2 == 0){
+                    else {
                         System.out.print(sideSideCheck(o /2, i / 2));
                     }
                 }
