@@ -25,47 +25,21 @@ public class Room {
     }
     void edgeCheck()
     {
-        numMove = 4;
-        if (xCord == 0) {
+        if (xCord == 0)
             canMove[W] = false;
-            numMove--;
-        }
-        if (xCord == X_ROOM -1) {
+        if (xCord == X_ROOM -1)
             canMove[E] = false;
-            numMove--;
-        }
-        if (yCord == 0) {
+        if (yCord == 0)
             canMove[N] = false;
-            numMove--;
-        }
-        if (yCord == Y_ROOM -1) {
+        if (yCord == Y_ROOM -1)
             canMove[S] = false;
-            numMove--;
-        }
+        numMoveCheck();
     }
-    boolean[] alterablePaths(){
-        boolean[] directions = new boolean[] {true, true, true, true};
-        numMove = 4;
-        if (xCord == 0) {
-            directions[W] = false;
-            numMove--;
-        }
-        if (xCord == X_ROOM -1) {
-            directions[E] = false;
-            numMove--;
-        }
-        if (yCord == 0) {
-            directions[N] = false;
-            numMove--;
-        }
-        if (yCord == Y_ROOM -1) {
-            directions[S] = false;
-            numMove--;
-        }
-        for (int i = 0; i < directions.length; i++)
-            if (canMove[i])
-                directions[i] = false;
-        return directions;
+    void numMoveCheck(){
+        numMove = 0;
+        for (boolean t : canMove)
+            if (t)
+                numMove++;
     }
     void changeMove(boolean[] t){
         canMove = t;
@@ -83,28 +57,15 @@ public class Room {
         canPath = false;
         isExit = false;
     }
-    public int numMove(){
-        int num = 0;
-        for (boolean t : canMove)
-            if (t)
-                num++;
-        return num;
-    }
+    public int numMove(){ return numMove; }
     public int[] alterablePathsInt(){
-        boolean[] temp = alterablePaths();
-        int trueNum = 0;
-        for (boolean t : temp)
-            if (t)
-                trueNum++;
-        int[] directions = new int[trueNum];
+        numMoveCheck();
+        int[] alterable = new int[4 - numMove];
         int count = 0;
-        for (int i = 0; i < temp.length; i++){
-            if (temp[i]) {
-                directions[count] = i;
-                count++;
-            }
-        }
-        return directions;
+        for (int i = 0; i < canMove.length; i++)
+            if (!canMove[i])
+                alterable[count++] = i;
+        return alterable;
     }
     public String toString(){
         if (isExit)

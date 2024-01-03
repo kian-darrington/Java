@@ -3,8 +3,8 @@ import java.util.Random;
 
 public class MazeMaker {
     //Dimensions for the maze
-    public static int X_ROOMS = 4;
-    public static int Y_ROOMS = 4;
+    public static int X_ROOMS = 9;
+    public static int Y_ROOMS = 9;
     private static final Random rand = new Random();
     //The maze as a 2D array of rooms
     private static Room[][] rooms = new Room[X_ROOMS][Y_ROOMS];
@@ -105,16 +105,16 @@ public class MazeMaker {
         boolean complete = false;
         int x = 0, y = 0;
         boolean[][] seenBefore = new boolean[X_ROOMS][Y_ROOMS];
-        while (!rooms[x][y].getExit()){
+        while (!rooms[x][y].getExit()) {
             seenBefore[x][y] = true;
             int[] direction = rooms[x][y].alterablePathsInt();
             int moveTo = 0;
             int count = 0;
-            while (true){
+            while (true) {
                 count++;
                 System.out.println(x + ' ' + y);
                 int tempX = x, tempY = y;
-                if (count > 12 || direction == null){
+                if (count > 12 || direction == null) {
                     int[] possible = rooms[x][y].getDirections();
                     moveTo = possible[rand.nextInt(possible.length)];
                     switch (moveTo) {
@@ -130,7 +130,9 @@ public class MazeMaker {
                         case W:
                             tempX--;
                     }
-                    if (y < 0)
+                    if (tempY < 0 || tempY >= Y_ROOMS)
+                        continue;
+                    if (tempX < 0 || tempX >= X_ROOMS)
                         continue;
                     x = tempX;
                     y = tempY;
@@ -151,11 +153,18 @@ public class MazeMaker {
                     case W:
                         tempX--;
                 }
-                if (!seenBefore[tempX][tempY]){
-                    if (y < 0)
-                        continue;
+                if (tempY < 0 || tempY >= Y_ROOMS || tempX < 0 || tempX >= X_ROOMS) {
+                    continue;
+                }
+                if (!seenBefore[tempX][tempY]) {
                     rooms[x][y].changeMove(moveTo, true);
                     alterSurrounding(rooms[x][y]);
+                    x = tempX;
+                    y = tempY;
+                    count = 0;
+                    break;
+                }
+                else {
                     x = tempX;
                     y = tempY;
                     count = 0;
@@ -188,6 +197,7 @@ public class MazeMaker {
             }
             }
     }
+    
     char upDownCheck(int x, int y){
         if (y == 0)
             return block;
