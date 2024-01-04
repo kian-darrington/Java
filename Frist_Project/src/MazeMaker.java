@@ -63,6 +63,9 @@ public class MazeMaker {
         makePath();
         return rooms;
     }
+    void cornerExit(){
+        rooms[X_ROOMS-1][Y_ROOMS-1].setExit(true);
+    }
     void randSetExit(){
         int exitCount = 0;
         do {
@@ -82,12 +85,10 @@ public class MazeMaker {
                     rooms[0][exit - (X_ROOMS - 2)].setExit(true);
             }
             //Error check for multiple exits and if the Start is the exit
-            boolean hasExit = false;
             for (Room[] r : rooms){
                 for (Room room : r){
                     if (room.getExit()){
                         if (room.xCord !=0 || room.yCord != 0) {
-                            hasExit = true;
                             if (exitCount > 0)
                                 room.setExit(false);
                             exitCount++;
@@ -101,20 +102,19 @@ public class MazeMaker {
         } while (exitCount < 1);
     }
     void makePath(){
-        randSetExit();
-        boolean complete = false;
+        cornerExit();
         int x = 0, y = 0;
         boolean[][] seenBefore = new boolean[X_ROOMS][Y_ROOMS];
         while (!rooms[x][y].getExit()) {
             seenBefore[x][y] = true;
+            rooms[x][y].onPath();
+            rooms[x][y].seen();
             int[] direction = rooms[x][y].alterablePathsInt();
             int moveTo = 0;
-            int count = 0;
             while (true) {
-                count++;
-                System.out.println(x + ' ' + y);
+                System.out.println(x + " " + y);
                 int tempX = x, tempY = y;
-                if (count > 12 || direction == null) {
+                if (direction == null) {
                     int[] possible = rooms[x][y].getDirections();
                     moveTo = possible[rand.nextInt(possible.length)];
                     switch (moveTo) {
@@ -136,39 +136,37 @@ public class MazeMaker {
                         continue;
                     x = tempX;
                     y = tempY;
-                    count = 0;
-                    break;
-                }
-                moveTo = direction[rand.nextInt(direction.length)];
-                switch (moveTo) {
-                    case N:
-                        tempY--;
-                        break;
-                    case E:
-                        tempX++;
-                        break;
-                    case S:
-                        tempY++;
-                        break;
-                    case W:
-                        tempX--;
-                }
-                if (tempY < 0 || tempY >= Y_ROOMS || tempX < 0 || tempX >= X_ROOMS) {
-                    continue;
-                }
-                if (!seenBefore[tempX][tempY]) {
-                    rooms[x][y].changeMove(moveTo, true);
-                    alterSurrounding(rooms[x][y]);
-                    x = tempX;
-                    y = tempY;
-                    count = 0;
                     break;
                 }
                 else {
-                    x = tempX;
-                    y = tempY;
-                    count = 0;
-                    break;
+                    moveTo = direction[rand.nextInt(direction.length)];
+                    switch (moveTo) {
+                        case N:
+                            tempY--;
+                            break;
+                        case E:
+                            tempX++;
+                            break;
+                        case S:
+                            tempY++;
+                            break;
+                        case W:
+                            tempX--;
+                    }
+                    if (tempY < 0 || tempY >= Y_ROOMS || tempX < 0 || tempX >= X_ROOMS) {
+                        continue;
+                    }
+                    if (!seenBefore[tempX][tempY]) {
+                        rooms[x][y].changeMove(moveTo, true);
+                        alterSurrounding(rooms[x][y]);
+                        x = tempX;
+                        y = tempY;
+                        break;
+                    } else {
+                        x = tempX;
+                        y = tempY;
+                        break;
+                    }
                 }
             }
         }
@@ -176,7 +174,7 @@ public class MazeMaker {
     public void printMaze(){
         for (int i = 0; i < Y_ROOMS * 2 + 1; i++){
             for (int o = 0; o < X_ROOMS * 2 + 1; o++){
-                if (!(o % 2 != 0 || i % 2 != 0))
+                if (o % 2 == 0 && i % 2 == 0)
                     System.out.print(block);
                 else if (o % 2 == 1 && i % 2 == 1)
                     System.out.print(rooms[o / 2][i / 2]);
@@ -190,12 +188,12 @@ public class MazeMaker {
             }
             System.out.println();
         }
-        for (int i = 0; i < Y_ROOMS; i++){
+        /*for (int i = 0; i < Y_ROOMS; i++){
             for (int o = 0; o < X_ROOMS; o++) {
                 System.out.print(o + " " + i + " ");
                 System.out.println(Arrays.toString(rooms[o][i].canMove));
             }
-            }
+        }*/ //for Debug
     }
     
     char upDownCheck(int x, int y){
@@ -225,7 +223,7 @@ public class MazeMaker {
             else
                 return block;
         }
-        else if (rooms[x][y].getMove(E) && rooms[x + 1][y].getMove(W))
+        else if (rooms[x][y].getMove(W) && rooms[x - 1][y].getMove(E))
             return ' ';
         else
             return block;

@@ -1,15 +1,20 @@
 public class Room {
     final int X_ROOM = MazeMaker.X_ROOMS;
     final int Y_ROOM = MazeMaker.Y_ROOMS;
-    int numMove = 4;
+    int numMove = 4, timesSeen = 0;
     int xCord;
     int yCord;
-    boolean onPath, canPath, isExit;
+    boolean onPath, isExit;
     public static final int N = 0, E = 1, S = 2, W = 3;
 
     // select * from user_table where firstname = "mike"; drop user_table; "x";
-
-
+    void onPath(){
+        onPath = true;
+    }
+    void seen(){
+        timesSeen++;
+    }
+    int getTimesSeen(){return timesSeen;}
     //True or false for N, E, S, W
     boolean[] canMove = new boolean[4];
     Room(){ reset(); }
@@ -54,7 +59,6 @@ public class Room {
     void reset(){
         canMove = new boolean[] {false, false, false, false};
         onPath = false;
-        canPath = false;
         isExit = false;
     }
     public int numMove(){ return numMove; }
@@ -73,7 +77,7 @@ public class Room {
         else if (xCord == 0 && yCord == 0)
             return "S";
         else
-            return "R";
+            return " ";
     }
     public boolean[] getMove() { return canMove; }
     public int[] getDirections() {
