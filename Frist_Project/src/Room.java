@@ -7,12 +7,17 @@ public class Room {
     boolean onPath, isExit;
     public static final int N = 0, E = 1, S = 2, W = 3;
 
+    Room[] neighbors = new Room[4];
+
     // select * from user_table where firstname = "mike"; drop user_table; "x";
     void onPath(){
         onPath = true;
     }
     void seen(){
         timesSeen++;
+    }
+    void assignNeighbors(Room[] r){
+        neighbors = r;
     }
     int getTimesSeen(){return timesSeen;}
     //True or false for N, E, S, W
@@ -40,6 +45,16 @@ public class Room {
             canMove[S] = false;
         numMoveCheck();
     }
+    void edgeCheck (boolean[] t){
+        if (xCord == 0)
+            t[W] = false;
+        if (xCord == X_ROOM -1)
+            t[E] = false;
+        if (yCord == 0)
+            t[N] = false;
+        if (yCord == Y_ROOM -1)
+            t[S] = false;
+    }
     void numMoveCheck(){
         numMove = 0;
         for (boolean t : canMove)
@@ -64,12 +79,37 @@ public class Room {
     public int numMove(){ return numMove; }
     public int[] alterablePathsInt(){
         numMoveCheck();
-        int[] alterable = new int[4 - numMove];
+        boolean[] ableToChange = new boolean[4];
+
+        for (int i = 0; i < 4; i++)
+            ableToChange[i] = !canMove[i];
+        edgeCheck(ableToChange);
+
+
+
+        int pathNum = 0;
+        for (boolean t : ableToChange)
+            if (t)
+                pathNum++;
+
+        int[]alterable = new int[pathNum];
+
         int count = 0;
-        for (int i = 0; i < canMove.length; i++)
-            if (!canMove[i])
+        for(int i = 0; i < ableToChange.length; i++)
+            if (ableToChange[i])
                 alterable[count++] = i;
+
         return alterable;
+    }
+    void neighborCheck(boolean[] t){
+        for (int i = 0; i <t.length; i++){
+            if (t[i]){
+                switch (i){
+                    case N:
+                        if (neighbors[N] != null && !neighbors[N].getPath())
+                }
+            }
+        }
     }
     public String toString(){
         if (isExit)
@@ -77,7 +117,7 @@ public class Room {
         else if (xCord == 0 && yCord == 0)
             return "S";
         else
-            return " ";
+            return "" + xCord % 10;
     }
     public boolean[] getMove() { return canMove; }
     public int[] getDirections() {
@@ -85,9 +125,10 @@ public class Room {
         int count = 0;
         for (int i =0; i < canMove.length; i++){
             if (canMove[i])
-                temp[count] = i;
+                temp[count++] = i;
         }
         return temp;
     }
+    boolean getPath() {return onPath;}
     public boolean getMove(int direction) { return canMove[direction]; }
 }

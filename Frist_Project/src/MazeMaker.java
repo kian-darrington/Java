@@ -18,6 +18,23 @@ public class MazeMaker {
             for (int o = 0; o < Y_ROOMS; o++){
                 rooms[i][o] = new Room();
                 rooms[i][o].setCord(i, o);
+                Room[] neighbors = new Room[4];
+                if (o != 0)
+                    neighbors[N] = rooms[i][o - 1];
+                else
+                    neighbors[N] = null;
+                if (i < X_ROOMS - 1)
+                    neighbors[E] = rooms[i + 1][o];
+                else
+                    neighbors[E] = null;
+                if (o < Y_ROOMS - 1)
+                    neighbors[S] = rooms[i][o + 1];
+                else
+                    neighbors[S] = null;
+                if ( i != 0)
+                    neighbors[W] = rooms[i - 1][o];
+                else
+                    neighbors[W] = null;
             }
         }
     }
@@ -159,14 +176,10 @@ public class MazeMaker {
                     if (!seenBefore[tempX][tempY]) {
                         rooms[x][y].changeMove(moveTo, true);
                         alterSurrounding(rooms[x][y]);
-                        x = tempX;
-                        y = tempY;
-                        break;
-                    } else {
-                        x = tempX;
-                        y = tempY;
-                        break;
                     }
+                    x = tempX;
+                    y = tempY;
+                    break;
                 }
             }
         }
