@@ -13,9 +13,6 @@ public class Room {
     void onPath(){
         onPath = true;
     }
-    void seen(){
-        timesSeen++;
-    }
     void assignNeighbors(Room[] r){
         neighbors = r;
     }
@@ -85,14 +82,14 @@ public class Room {
             ableToChange[i] = !canMove[i];
         edgeCheck(ableToChange);
 
-
+        neighborCheck(ableToChange);
 
         int pathNum = 0;
         for (boolean t : ableToChange)
             if (t)
                 pathNum++;
 
-        int[]alterable = new int[pathNum];
+        int[] alterable = new int[pathNum];
 
         int count = 0;
         for(int i = 0; i < ableToChange.length; i++)
@@ -102,12 +99,14 @@ public class Room {
         return alterable;
     }
     void neighborCheck(boolean[] t){
-        for (int i = 0; i <t.length; i++){
+        for (int i = 0; i < t.length; i++){
             if (t[i]){
-                switch (i){
-                    case N:
-                        if (neighbors[N] != null && !neighbors[N].getPath())
+                if (neighbors[i] != null) {
+                    if (neighbors[i].getPath())
+                        t[i] = false;
                 }
+                else
+                    t[i] = false;
             }
         }
     }
@@ -117,7 +116,8 @@ public class Room {
         else if (xCord == 0 && yCord == 0)
             return "S";
         else
-            return "" + xCord % 10;
+            return " ";
+            //return "" + xCord % 10;
     }
     public boolean[] getMove() { return canMove; }
     public int[] getDirections() {
