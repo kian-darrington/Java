@@ -10,9 +10,8 @@ public class Room {
     Room[] neighbors = new Room[4];
 
     // select * from user_table where firstname = "mike"; drop user_table; "x";
-    void onPath(){
-        onPath = true;
-    }
+    void onPath(){onPath = true;}
+    void offPath() {onPath = false;}
     void onNewPath() {onNewPath = true;}
     void assignNeighbors(Room[] r){
         neighbors = r;
@@ -107,7 +106,6 @@ public class Room {
         for (int i = 0; i < 4; i++)
             ableToChange[i] = !canMove[i];
         edgeCheck(ableToChange);
-        neighborCheckCleanUp(ableToChange);
         int pathNum = 0;
         for (boolean t : ableToChange)
             if (t)
@@ -138,7 +136,7 @@ public class Room {
         for (int i = 0; i < t.length; i++){
             if (t[i]){
                 if (neighbors[i] != null) {
-                    if (neighbors[i].getNewPath())
+                    if (neighbors[i].getNewPath() && !neighbors[i].getPath())
                         t[i] = false;
                 }
                 else
@@ -151,9 +149,12 @@ public class Room {
             return "F";
         else if (xCord == 0 && yCord == 0)
             return "S";
-        else
+        else {
+            if (!onPath || onNewPath)
+                return "N";
             return " ";
             //return "" + xCord % 10;
+        }
     }
     public boolean[] getMove() { return canMove; }
     public int[] getDirections() {

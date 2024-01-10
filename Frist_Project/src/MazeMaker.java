@@ -1,5 +1,4 @@
-import java.util.Arrays;
-import java.util.Random;
+import java.util.*;
 
 public class MazeMaker {
     //Dimensions for the maze
@@ -174,10 +173,8 @@ public class MazeMaker {
                     if (tempY < 0 || tempY >= Y_ROOMS || tempX < 0 || tempX >= X_ROOMS) {
                         continue;
                     }
-                    if (!rooms[tempX][tempY].getPath()) {
-                        rooms[x][y].changeMove(moveTo, true);
-                        alterSurrounding(rooms[x][y]);
-                    }
+                    rooms[x][y].changeMove(moveTo, true);
+                    alterSurrounding(rooms[x][y]);
                     x = tempX;
                     y = tempY;
                     break;
@@ -190,12 +187,15 @@ public class MazeMaker {
                 if (!rooms[i][o].getPath()){
                     x = i;
                     y = o;
+                    ArrayList<Integer> Xs = new ArrayList<>();
+                    ArrayList<Integer> Ys = new ArrayList<>();
                     while (!rooms[x][y].getPath()) {
+                        Xs.add(x);
+                        Ys.add(y);
                         rooms[x][y].onNewPath();
                         int[] direction = rooms[x][y].alterablePathsIntCleanUp();
                         int moveTo = 0;
                         while (true) {
-                            System.out.println(x + " " + y);
                             int tempX = x, tempY = y;
                             if (direction.length < 1) {
                                 int[] possible = rooms[x][y].getDirections();
@@ -238,17 +238,19 @@ public class MazeMaker {
                                 if (tempY < 0 || tempY >= Y_ROOMS || tempX < 0 || tempX >= X_ROOMS) {
                                     continue;
                                 }
-                                if (!rooms[tempX][tempY].getPath()) {
-                                    rooms[x][y].changeMove(moveTo, true);
-                                    alterSurrounding(rooms[x][y]);
-                                }
+                                if (rooms[tempX][tempY].getPath())
+                                    rooms[x][y].onPath();
+                                rooms[x][y].changeMove(moveTo, true);
+                                alterSurrounding(rooms[x][y]);
                                 x = tempX;
                                 y = tempY;
                                 break;
                             }
                         }
                     }
-
+                    for (int j = 0; j < Xs.size(); j++){
+                        rooms[Xs.get(j)][Ys.get(j)].onPath();
+                    }
                 }
             }
         }
