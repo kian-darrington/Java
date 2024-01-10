@@ -4,7 +4,7 @@ public class Room {
     int numMove = 4, timesSeen = 0;
     int xCord;
     int yCord;
-    boolean onPath, isExit;
+    boolean onPath, isExit, onNewPath;
     public static final int N = 0, E = 1, S = 2, W = 3;
 
     Room[] neighbors = new Room[4];
@@ -13,6 +13,7 @@ public class Room {
     void onPath(){
         onPath = true;
     }
+    void onNewPath() {onNewPath = true;}
     void assignNeighbors(Room[] r){
         neighbors = r;
     }
@@ -72,6 +73,7 @@ public class Room {
         canMove = new boolean[] {false, false, false, false};
         onPath = false;
         isExit = false;
+        onNewPath = false;
     }
     public int numMove(){ return numMove; }
     public int[] alterablePathsInt(){
@@ -98,11 +100,45 @@ public class Room {
 
         return alterable;
     }
+    public int[] alterablePathsIntCleanUp(){
+        numMoveCheck();
+        boolean[] ableToChange = new boolean[4];
+
+        for (int i = 0; i < 4; i++)
+            ableToChange[i] = !canMove[i];
+        edgeCheck(ableToChange);
+        neighborCheckCleanUp(ableToChange);
+        int pathNum = 0;
+        for (boolean t : ableToChange)
+            if (t)
+                pathNum++;
+
+        int[] alterable = new int[pathNum];
+
+        int count = 0;
+        for(int i = 0; i < ableToChange.length; i++)
+            if (ableToChange[i])
+                alterable[count++] = i;
+
+        return alterable;
+    }
     void neighborCheck(boolean[] t){
         for (int i = 0; i < t.length; i++){
             if (t[i]){
                 if (neighbors[i] != null) {
                     if (neighbors[i].getPath())
+                        t[i] = false;
+                }
+                else
+                    t[i] = false;
+            }
+        }
+    }
+    void neighborCheckCleanUp(boolean[] t){
+        for (int i = 0; i < t.length; i++){
+            if (t[i]){
+                if (neighbors[i] != null) {
+                    if (neighbors[i].getNewPath())
                         t[i] = false;
                 }
                 else
@@ -130,5 +166,6 @@ public class Room {
         return temp;
     }
     boolean getPath() {return onPath;}
+    boolean getNewPath() {return onNewPath;}
     public boolean getMove(int direction) { return canMove[direction]; }
 }

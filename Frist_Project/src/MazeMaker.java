@@ -185,14 +185,14 @@ public class MazeMaker {
             }
         }
         // This checks all the rooms to see if they are connected to the path
-        /*for (int i = 0; i < X_ROOMS; i++){
+        for (int i = 0; i < X_ROOMS; i++){
             for (int o = 0; o < Y_ROOMS; o++){
                 if (!rooms[i][o].getPath()){
                     x = i;
                     y = o;
                     while (!rooms[x][y].getPath()) {
-                        rooms[x][y].onPath();
-                        int[] direction = rooms[x][y].alterablePathsInt();
+                        rooms[x][y].onNewPath();
+                        int[] direction = rooms[x][y].alterablePathsIntCleanUp();
                         int moveTo = 0;
                         while (true) {
                             System.out.println(x + " " + y);
@@ -251,7 +251,7 @@ public class MazeMaker {
 
                 }
             }
-        }*/
+        }
     }
     public void printMaze(){
         for (int i = 0; i < Y_ROOMS * 2 + 1; i++){
