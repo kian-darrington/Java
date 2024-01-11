@@ -1,3 +1,4 @@
+import java.util.*;
 public class Room {
     final int X_ROOM = MazeMaker.X_ROOMS;
     final int Y_ROOM = MazeMaker.Y_ROOMS;
@@ -7,6 +8,7 @@ public class Room {
     boolean onPath, isExit, onNewPath;
     public static final int N = 0, E = 1, S = 2, W = 3;
 
+    private static final Random rand = new Random();
     Room[] neighbors = new Room[4];
 
     // select * from user_table where firstname = "mike"; drop user_table; "x";
@@ -132,6 +134,35 @@ public class Room {
             }
         }
     }
+    int getX(){return xCord;}
+    int getY(){return yCord;}
+    boolean neighborOnPath(){
+        for (Room n : neighbors){
+            if (n != null)
+                if (n.getPath())
+                    return true;
+        }
+        return false;
+    }
+    int neighborToPath() {
+        int count = 0;
+        for (Room n : neighbors){
+            if (n != null)
+                if (n.getPath())
+                    count++;
+        }
+        if (count == 0) {
+            return -1;
+        }
+        int[] pathChoice = new int[count];
+        int q = 0;
+        for (int i = 0; i < 4; i++){
+            if (neighbors[i] != null)
+                if (neighbors[i].getPath())
+                    pathChoice[q++] = i;
+        }
+        return pathChoice[rand.nextInt(count)];
+    }
     void neighborCheckCleanUp(boolean[] t){
         for (int i = 0; i < t.length; i++){
             if (t[i]){
@@ -150,8 +181,6 @@ public class Room {
         else if (xCord == 0 && yCord == 0)
             return "S";
         else {
-            if (!onPath || onNewPath)
-                return "N";
             return " ";
             //return "" + xCord % 10;
         }

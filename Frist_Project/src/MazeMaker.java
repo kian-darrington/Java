@@ -181,79 +181,87 @@ public class MazeMaker {
                 }
             }
         }
+        ArrayList<Room> unConnected = new ArrayList<>();
         // This checks all the rooms to see if they are connected to the path
         for (int i = 0; i < X_ROOMS; i++){
-            for (int o = 0; o < Y_ROOMS; o++){
-                if (!rooms[i][o].getPath()){
-                    x = i;
-                    y = o;
-                    ArrayList<Integer> Xs = new ArrayList<>();
-                    ArrayList<Integer> Ys = new ArrayList<>();
-                    while (!rooms[x][y].getPath()) {
-                        Xs.add(x);
-                        Ys.add(y);
-                        rooms[x][y].onNewPath();
-                        int[] direction = rooms[x][y].alterablePathsIntCleanUp();
-                        int moveTo = 0;
-                        while (true) {
-                            int tempX = x, tempY = y;
-                            if (direction.length < 1) {
-                                int[] possible = rooms[x][y].getDirections();
-                                moveTo = possible[rand.nextInt(possible.length)];
-                                switch (moveTo) {
-                                    case N:
-                                        tempY--;
-                                        break;
-                                    case E:
-                                        tempX++;
-                                        break;
-                                    case S:
-                                        tempY++;
-                                        break;
-                                    case W:
-                                        tempX--;
-                                }
-                                if (tempY < 0 || tempY >= Y_ROOMS)
-                                    continue;
-                                if (tempX < 0 || tempX >= X_ROOMS)
-                                    continue;
-                                x = tempX;
-                                y = tempY;
-                                break;
-                            } else {
-                                moveTo = direction[rand.nextInt(direction.length)];
-                                switch (moveTo) {
-                                    case N:
-                                        tempY--;
-                                        break;
-                                    case E:
-                                        tempX++;
-                                        break;
-                                    case S:
-                                        tempY++;
-                                        break;
-                                    case W:
-                                        tempX--;
-                                }
-                                if (tempY < 0 || tempY >= Y_ROOMS || tempX < 0 || tempX >= X_ROOMS) {
-                                    continue;
-                                }
-                                if (rooms[tempX][tempY].getPath())
-                                    rooms[x][y].onPath();
-                                rooms[x][y].changeMove(moveTo, true);
-                                alterSurrounding(rooms[x][y]);
-                                x = tempX;
-                                y = tempY;
-                                break;
+            for (int o = 0; o < Y_ROOMS; o++) {
+                if (!rooms[x][y].getPath())
+                    unConnected.add(rooms[i][o]);
+            }
+        }
+        for (int i = 0; i < unConnected.size(); i++) {
+            Room now = unConnected.get(rand.nextInt(unConnected.size()));
+            if (now.getPath()) {
+                x = now.getX();
+                y = now.getY();
+                ArrayList<Integer> Xs = new ArrayList<>();
+                ArrayList<Integer> Ys = new ArrayList<>();
+                while (!rooms[x][y].getPath()) {
+                    Xs.add(x);
+                    Ys.add(y);
+                    rooms[x][y].onNewPath();
+                    int[] direction = rooms[x][y].alterablePathsIntCleanUp();
+                    int moveTo = 0;
+                    while (true) {
+                        int tempX = x, tempY = y;
+                        if (direction.length < 1) {
+                            int[] possible = rooms[x][y].getDirections();
+                            moveTo = possible[rand.nextInt(possible.length)];
+                            switch (moveTo) {
+                                case N:
+                                    tempY--;
+                                    break;
+                                case E:
+                                    tempX++;
+                                    break;
+                                case S:
+                                    tempY++;
+                                    break;
+                                case W:
+                                    tempX--;
                             }
+                            if (tempY < 0 || tempY >= Y_ROOMS)
+                                continue;
+                            if (tempX < 0 || tempX >= X_ROOMS)
+                                continue;
+                            x = tempX;
+                            y = tempY;
+                            break;
+                        } else {
+                            if (!rooms[x][y].neighborOnPath())
+                                moveTo = direction[rand.nextInt(direction.length)];
+                            else
+                                moveTo = rooms[x][y].neighborToPath();
+                            switch (moveTo) {
+                                case N:
+                                    tempY--;
+                                    break;
+                                case E:
+                                    tempX++;
+                                    break;
+                                case S:
+                                    tempY++;
+                                    break;
+                                case W:
+                                    tempX--;
+                            }
+                            if (tempY < 0 || tempY >= Y_ROOMS || tempX < 0 || tempX >= X_ROOMS) {
+                                continue;
+                            }
+                            rooms[x][y].changeMove(moveTo, true);
+                            alterSurrounding(rooms[x][y]);
+                            x = tempX;
+                            y = tempY;
+                            break;
                         }
                     }
-                    for (int j = 0; j < Xs.size(); j++){
-                        rooms[Xs.get(j)][Ys.get(j)].onPath();
-                    }
+                }
+                for (int j = 0; j < Xs.size(); j++) {
+                    rooms[Xs.get(j)][Ys.get(j)].onPath();
                 }
             }
         }
+
     }
     public void printMaze(){
         for (int i = 0; i < Y_ROOMS * 2 + 1; i++){
