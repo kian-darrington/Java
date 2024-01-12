@@ -181,6 +181,8 @@ public class Room {
         else if (xCord == 0 && yCord == 0)
             return "S";
         else {
+            if (onNewPath)
+                return "N";
             return " ";
             //return "" + xCord % 10;
         }

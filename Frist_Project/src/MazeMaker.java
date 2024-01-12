@@ -182,18 +182,20 @@ public class MazeMaker {
             }
         }
         ArrayList<Room> unConnected = new ArrayList<>();
+        ArrayList<Integer> badYs = new ArrayList<>();
         // This checks all the rooms to see if they are connected to the path
         for (int i = 0; i < X_ROOMS; i++){
             for (int o = 0; o < Y_ROOMS; o++) {
-                if (!rooms[x][y].getPath())
+                if (!rooms[i][o].getPath()) {
                     unConnected.add(rooms[i][o]);
+                }
             }
         }
-        for (int i = 0; i < unConnected.size(); i++) {
-            Room now = unConnected.get(rand.nextInt(unConnected.size()));
-            if (now.getPath()) {
-                x = now.getX();
-                y = now.getY();
+        while (!unConnected.isEmpty()) {
+            int num = rand.nextInt(unConnected.size());
+            if (!unConnected.get(num).getPath()) {
+                x = unConnected.get(num).getX();
+                y = unConnected.get(num).getY();
                 ArrayList<Integer> Xs = new ArrayList<>();
                 ArrayList<Integer> Ys = new ArrayList<>();
                 while (!rooms[x][y].getPath()) {
@@ -258,6 +260,7 @@ public class MazeMaker {
                 }
                 for (int j = 0; j < Xs.size(); j++) {
                     rooms[Xs.get(j)][Ys.get(j)].onPath();
+                    unConnected.remove(rooms[Xs.get(j)][Ys.get(j)]);
                 }
             }
         }
