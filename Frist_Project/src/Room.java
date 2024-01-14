@@ -108,6 +108,7 @@ public class Room {
         for (int i = 0; i < 4; i++)
             ableToChange[i] = !canMove[i];
         edgeCheck(ableToChange);
+        neighborCheckCleanUp(ableToChange);
         int pathNum = 0;
         for (boolean t : ableToChange)
             if (t)
