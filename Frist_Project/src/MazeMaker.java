@@ -126,67 +126,62 @@ public class MazeMaker {
             }
         } while (exitCount < 1);
     }
+    void alterCoord(int[] tempCoord, int moveTo){
+        switch (moveTo) {
+            case N:
+                tempCoord[1]--;
+                break;
+            case E:
+                tempCoord[0]++;
+                break;
+            case S:
+                tempCoord[1]++;
+                break;
+            case W:
+                tempCoord[0]--;
+                break;
+        }
+    }
     void makePath(){
         cornerExit();
-        int x = 0, y = 0;
-        while (!rooms[x][y].getExit()) {
-            rooms[x][y].onPath();
-            int[] direction = rooms[x][y].alterablePathsInt();
+        int[] coord = new int[2];
+        while (!rooms[coord[0]][coord[1]].getExit()) {
+            rooms[coord[0]][coord[1]].onPath();
+            int[] direction = rooms[coord[0]][coord[1]].alterablePathsInt();
             int moveTo = 0;
             while (true) {
-                int tempX = x, tempY = y;
+                int[] tempCoord = coord.clone();
                 if (direction.length < 1) {
-                    int[] possible = rooms[x][y].getDirections();
+                    int[] possible = rooms[coord[0]][coord[1]].getDirections();
                     moveTo = possible[rand.nextInt(possible.length)];
-                    switch (moveTo) {
-                        case N:
-                            tempY--;
-                            break;
-                        case E:
-                            tempX++;
-                            break;
-                        case S:
-                            tempY++;
-                            break;
-                        case W:
-                            tempX--;
+
+                    alterCoord(tempCoord, moveTo);
+
+                    if (tempCoord[1] < 0 || tempCoord[1] >= Y_ROOMS || tempCoord[0] < 0 || tempCoord[0] >= X_ROOMS) {
+                        continue;
                     }
-                    if (tempY < 0 || tempY >= Y_ROOMS)
-                        continue;
-                    if (tempX < 0 || tempX >= X_ROOMS)
-                        continue;
-                    x = tempX;
-                    y = tempY;
+
+                    coord = tempCoord;
                     break;
                 }
                 else {
                     moveTo = direction[rand.nextInt(direction.length)];
-                    switch (moveTo) {
-                        case N:
-                            tempY--;
-                            break;
-                        case E:
-                            tempX++;
-                            break;
-                        case S:
-                            tempY++;
-                            break;
-                        case W:
-                            tempX--;
-                    }
-                    if (tempY < 0 || tempY >= Y_ROOMS || tempX < 0 || tempX >= X_ROOMS) {
+
+                    alterCoord(tempCoord, moveTo);
+
+                    if (tempCoord[1] < 0 || tempCoord[1] >= Y_ROOMS || tempCoord[0] < 0 || tempCoord[0] >= X_ROOMS) {
                         continue;
                     }
-                    rooms[x][y].changeMove(moveTo, true);
-                    alterSurrounding(rooms[x][y]);
-                    x = tempX;
-                    y = tempY;
+                    rooms[coord[0]][coord[1]].changeMove(moveTo, true);
+
+                    alterSurrounding(rooms[coord[0]][coord[1]]);
+
+                    coord = tempCoord;
                     break;
                 }
             }
         }
         ArrayList<Room> unConnected = new ArrayList<>();
-        ArrayList<Integer> badYs = new ArrayList<>();
         // This checks all the rooms to see if they are connected to the path
         for (int i = 0; i < X_ROOMS; i++){
             for (int o = 0; o < Y_ROOMS; o++) {
@@ -198,66 +193,39 @@ public class MazeMaker {
         while (!unConnected.isEmpty()) {
             int num = rand.nextInt(unConnected.size());
             if (!unConnected.get(num).getPath()) {
-                x = unConnected.get(num).getX();
-                y = unConnected.get(num).getY();
+                coord[0] = unConnected.get(num).getX();
+                coord[1] = unConnected.get(num).getY();
                 ArrayList<Integer> Xs = new ArrayList<>();
                 ArrayList<Integer> Ys = new ArrayList<>();
-                while (!rooms[x][y].getPath()) {
-                    Xs.add(x);
-                    Ys.add(y);
-                    rooms[x][y].onNewPath();
-                    int[] direction = rooms[x][y].alterablePathsIntCleanUp();
+                while (!rooms[coord[0]][coord[1]].getPath()) {
+                    Xs.add(coord[0]);
+                    Ys.add(coord[1]);
+                    rooms[coord[0]][coord[1]].onNewPath();
+                    int[] direction = rooms[coord[0]][coord[1]].alterablePathsIntCleanUp();
                     int moveTo = 0;
                     while (true) {
-                        int tempX = x, tempY = y;
+                        int[] tempCoord = coord.clone();
                         if (direction.length < 1) {
-                            int[] possible = rooms[x][y].getDirections();
+                            int[] possible = rooms[coord[0]][coord[1]].getDirections();
                             moveTo = possible[rand.nextInt(possible.length)];
-                            switch (moveTo) {
-                                case N:
-                                    tempY--;
-                                    break;
-                                case E:
-                                    tempX++;
-                                    break;
-                                case S:
-                                    tempY++;
-                                    break;
-                                case W:
-                                    tempX--;
+                            alterCoord(tempCoord, moveTo);
+                            if (tempCoord[1] < 0 || tempCoord[1] >= Y_ROOMS || tempCoord[0] < 0 || tempCoord[0] >= X_ROOMS) {
+                                continue;
                             }
-                            if (tempY < 0 || tempY >= Y_ROOMS)
-                                continue;
-                            if (tempX < 0 || tempX >= X_ROOMS)
-                                continue;
-                            x = tempX;
-                            y = tempY;
+                            coord = tempCoord;
                             break;
                         } else {
-                            if (!rooms[x][y].neighborOnPath())
+                            if (!rooms[coord[0]][coord[1]].neighborOnPath())
                                 moveTo = direction[rand.nextInt(direction.length)];
                             else
-                                moveTo = rooms[x][y].neighborToPath();
-                            switch (moveTo) {
-                                case N:
-                                    tempY--;
-                                    break;
-                                case E:
-                                    tempX++;
-                                    break;
-                                case S:
-                                    tempY++;
-                                    break;
-                                case W:
-                                    tempX--;
-                            }
-                            if (tempY < 0 || tempY >= Y_ROOMS || tempX < 0 || tempX >= X_ROOMS) {
+                                moveTo = rooms[coord[0]][coord[1]].neighborToPath();
+                            alterCoord(tempCoord, moveTo);
+                            if (tempCoord[1] < 0 || tempCoord[1] >= Y_ROOMS || tempCoord[0] < 0 || tempCoord[0] >= X_ROOMS) {
                                 continue;
                             }
-                            rooms[x][y].changeMove(moveTo, true);
-                            alterSurrounding(rooms[x][y]);
-                            x = tempX;
-                            y = tempY;
+                            rooms[coord[0]][coord[1]].changeMove(moveTo, true);
+                            alterSurrounding(rooms[coord[0]][coord[1]]);
+                            coord = tempCoord;
                             break;
                         }
                     }
