@@ -1,7 +1,7 @@
 import java.util.*;
-
+//This class makes a maze and can print it too
 public class MazeMaker {
-    //Dimensions for the maze
+    //Default dimensions for the maze, they are changed by the user later
     public static int X_ROOMS = 9;
     public static int Y_ROOMS = 9;
     private static final Random rand = new Random();
@@ -9,6 +9,7 @@ public class MazeMaker {
     private static Room[][] rooms = new Room[X_ROOMS][Y_ROOMS];
     //For the sake of my poor brain
     public static final int N = 0, E = 1, S = 2, W = 3;
+    //Used for printing the maze
     public static final char block = 0x2588;
 
     //Gives the rooms the information they need to know about themselves
@@ -19,6 +20,7 @@ public class MazeMaker {
                 rooms[i][o].setCord(i, o);
             }
         }
+        //Gives the rooms their neighbors for reference in making the maze
         for (int i = 0; i < X_ROOMS; i++){
             for (int o = 0; o < Y_ROOMS; o++){
                 Room[] neighbors = new Room[4];
@@ -43,7 +45,7 @@ public class MazeMaker {
         }
     }
 
-    //Changes all the rooms around the room sent according to the accessibility of the path
+    //Changes all the rooms around the room given according to the accessibility of the path
     void alterSurrounding(Room room)
     {
         int x = room.xCord, y = room.yCord;
@@ -79,14 +81,16 @@ public class MazeMaker {
     void changeMove(Room room){
         alterSurrounding(room);
     }
-
+    //Takes the empty unpaved maze and makes a path and makes all rooms accessible to all other rooms (no islands cut off)
     public Room[][] createMaze(){
         makePath();
         return rooms;
     }
+    //Sets the location of the exit to the bottom right corner
     void cornerExit(){
         rooms[X_ROOMS-1][Y_ROOMS-1].setExit(true);
     }
+    //Sets the location of the exit to a random point on the perimeter of the maze
     void randSetExit(){
         int exitCount = 0;
         do {
