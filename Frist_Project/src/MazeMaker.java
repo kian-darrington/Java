@@ -71,16 +71,6 @@ public class MazeMaker {
         if (y != 0 && direction == N)
             rooms[x][y - 1].changeMove(S, temp[N]);
     }
-
-    void changeMove(Room room, int direction){
-        boolean t = room.getMove()[direction];
-        rooms[room.xCord][room.yCord].changeMove(direction, t);
-        alterSurrounding(room, direction);
-    }
-
-    void changeMove(Room room){
-        alterSurrounding(room);
-    }
     //Takes the empty unpaved maze and makes a path and makes all rooms accessible to all other rooms (no islands cut off)
     public Room[][] createMaze(){
         makePath();
@@ -126,6 +116,7 @@ public class MazeMaker {
             }
         } while (exitCount < 1);
     }
+    //Takes a coordinate (x, y) and modifies the value based upon the direction given
     void alterCoord(int[] tempCoord, int moveTo){
         switch (moveTo) {
             case N:
@@ -142,15 +133,18 @@ public class MazeMaker {
                 break;
         }
     }
+    //Populates the maze with paths
     void makePath(){
         cornerExit();
-        int[] coord = new int[2];
+        int[] coord = new int[2]; //I used to have it be x and y, but for code simplicity it is now coord[0] coord[1]
+        //Makes the initial path to exit
         while (!rooms[coord[0]][coord[1]].getExit()) {
             rooms[coord[0]][coord[1]].onPath();
-            int[] direction = rooms[coord[0]][coord[1]].alterablePathsInt();
+            int[] direction = rooms[coord[0]][coord[1]].alterablePathsInt(); //Gets the possible directions of path making
             int moveTo = 0;
             while (true) {
                 int[] tempCoord = coord.clone();
+                //If the given room does not have a path to create, it will backtrack
                 if (direction.length < 1) {
                     int[] possible = rooms[coord[0]][coord[1]].getDirections();
                     moveTo = possible[rand.nextInt(possible.length)];
@@ -164,6 +158,7 @@ public class MazeMaker {
                     coord = tempCoord;
                     break;
                 }
+                //If the given room CAN create a path, then this is how it works
                 else {
                     moveTo = direction[rand.nextInt(direction.length)];
 
@@ -190,6 +185,7 @@ public class MazeMaker {
                 }
             }
         }
+        //Makes the rest of the maze that is currently unconnected connect to the path
         while (!unConnected.isEmpty()) {
             int num = rand.nextInt(unConnected.size());
             if (!unConnected.get(num).getPath()) {
@@ -205,20 +201,29 @@ public class MazeMaker {
                     int moveTo = 0;
                     while (true) {
                         int[] tempCoord = coord.clone();
+                        //If the path has nowhere to go, then it will backtrack
                         if (direction.length < 1) {
                             int[] possible = rooms[coord[0]][coord[1]].getDirections();
+
                             moveTo = possible[rand.nextInt(possible.length)];
+
                             alterCoord(tempCoord, moveTo);
+
                             if (tempCoord[1] < 0 || tempCoord[1] >= Y_ROOMS || tempCoord[0] < 0 || tempCoord[0] >= X_ROOMS) {
                                 continue;
                             }
+
                             coord = tempCoord;
                             break;
-                        } else {
+                        }
+                        //If the path has somewhere to go, then it will press forward
+                        else {
+                            //This checks to see if there is a room connected to the path nearby, if it is it will immediately go there
                             if (!rooms[coord[0]][coord[1]].neighborOnPath())
                                 moveTo = direction[rand.nextInt(direction.length)];
                             else
                                 moveTo = rooms[coord[0]][coord[1]].neighborToPath();
+
                             alterCoord(tempCoord, moveTo);
                             if (tempCoord[1] < 0 || tempCoord[1] >= Y_ROOMS || tempCoord[0] < 0 || tempCoord[0] >= X_ROOMS) {
                                 continue;
@@ -230,6 +235,7 @@ public class MazeMaker {
                         }
                     }
                 }
+                //makes all the newly created paths part of the main path
                 for (int j = 0; j < Xs.size(); j++) {
                     rooms[Xs.get(j)][Ys.get(j)].onPath();
                     unConnected.remove(rooms[Xs.get(j)][Ys.get(j)]);
@@ -238,6 +244,7 @@ public class MazeMaker {
         }
 
     }
+    //Prints the maze to the screen
     public void printMaze(){
         for (int i = 0; i < Y_ROOMS * 2 + 1; i++){
             for (int o = 0; o < X_ROOMS * 2 + 1; o++){
@@ -262,7 +269,7 @@ public class MazeMaker {
             }
         }*/ //for Debug
     }
-    
+    //Checks the current room and down neighbor path of a room to determine what is printed
     char upDownCheck(int x, int y){
         if (y == 0)
             return block;
@@ -279,6 +286,7 @@ public class MazeMaker {
         else
             return block;
     }
+    //Checks the current room and left neighbor path of a room to determine what is printed
     char sideSideCheck(int x, int y){
         if (x == 0)
             return block;
@@ -298,10 +306,14 @@ public class MazeMaker {
     public Room[][] getMaze(){
         return rooms;
     }
-
+    //Constructor
     MazeMaker(int x, int y){
         X_ROOMS = x;
         Y_ROOMS = y;
+        rooms = new Room[X_ROOMS][Y_ROOMS];
+        setUpRooms();
+    }
+    MazeMaker(){
         rooms = new Room[X_ROOMS][Y_ROOMS];
         setUpRooms();
     }
