@@ -2,8 +2,8 @@ import java.util.*;
 //This is the Room class which populates the maze
 public class Room {
     //Gets some information from the original class, should have set this up in the Constructor
-    final int X_ROOM = MazeMaker.X_ROOMS;
-    final int Y_ROOM = MazeMaker.Y_ROOMS;
+    int X_ROOM = 0;
+    int Y_ROOM = 0;
     //establishes necessary variables
     int numMove = 4, timesSeen = 0;
     int xCord;
@@ -13,7 +13,7 @@ public class Room {
     boolean onPath, isExit, onNewPath;
     //For the sake of my poor brain
     public static final int N = 0, E = 1, S = 2, W = 3;
-
+    boolean partOfSolvePath = false, onSolvePath = false;
     private static final Random rand = new Random();
     //Current neighbors
     Room[] neighbors = new Room[4];
@@ -87,6 +87,8 @@ public class Room {
         onPath = false;
         isExit = false;
         onNewPath = false;
+        X_ROOM = 0;
+        Y_ROOM = 0;
     }
     public int numMove(){ return numMove; }
     //Returns an array of the possible directions for which a maze maker could travel/create new paths
@@ -121,8 +123,10 @@ public class Room {
 
         for (int i = 0; i < 4; i++)
             ableToChange[i] = !canMove[i];
+
         edgeCheck(ableToChange);
         neighborCheckCleanUp(ableToChange);
+
         int pathNum = 0;
         for (boolean t : ableToChange)
             if (t)
@@ -220,6 +224,13 @@ public class Room {
         return temp;
     }
     //Gets and stuff
+    int[] getCoord(){
+        return new int[] {xCord, yCord};
+    }
+    void setMaxes(int xRoom, int yRoom){
+        X_ROOM = xRoom;
+        Y_ROOM = yRoom;
+    }
     boolean getPath() {return onPath;}
     boolean getNewPath() {return onNewPath;}
     public boolean getMove(int direction) { return canMove[direction]; }

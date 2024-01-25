@@ -17,6 +17,7 @@ public class MazeMaker {
         for(int i =0; i < X_ROOMS; i++){
             for (int o = 0; o < Y_ROOMS; o++){
                 rooms[i][o] = new Room();
+                rooms[i][o].setMaxes(X_ROOMS, Y_ROOMS);
                 rooms[i][o].setCord(i, o);
             }
         }
@@ -189,13 +190,10 @@ public class MazeMaker {
         while (!unConnected.isEmpty()) {
             int num = rand.nextInt(unConnected.size());
             if (!unConnected.get(num).getPath()) {
-                coord[0] = unConnected.get(num).getX();
-                coord[1] = unConnected.get(num).getY();
-                ArrayList<Integer> Xs = new ArrayList<>();
-                ArrayList<Integer> Ys = new ArrayList<>();
+                coord = unConnected.get(num).getCoord();
+                ArrayList<int[]> XYs = new ArrayList<>();
                 while (!rooms[coord[0]][coord[1]].getPath()) {
-                    Xs.add(coord[0]);
-                    Ys.add(coord[1]);
+                    XYs.add(coord);
                     rooms[coord[0]][coord[1]].onNewPath();
                     int[] direction = rooms[coord[0]][coord[1]].alterablePathsIntCleanUp();
                     int moveTo = 0;
@@ -236,9 +234,9 @@ public class MazeMaker {
                     }
                 }
                 //makes all the newly created paths part of the main path
-                for (int j = 0; j < Xs.size(); j++) {
-                    rooms[Xs.get(j)][Ys.get(j)].onPath();
-                    unConnected.remove(rooms[Xs.get(j)][Ys.get(j)]);
+                for (int j = 0; j < XYs.size(); j++) {
+                    rooms[XYs.get(j)[0]][XYs.get(j)[1]].onPath();
+                    unConnected.remove(rooms[XYs.get(j)[0]][XYs.get(j)[1]]);
                 }
             }
         }
