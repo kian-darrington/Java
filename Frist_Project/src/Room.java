@@ -205,6 +205,8 @@ public class Room {
             return "F";
         else if (xCord == 0 && yCord == 0)
             return "S";
+        else if (onSolvePath)
+            return "*";
         else {
             //if (onNewPath)
             //    return "N";
@@ -224,6 +226,7 @@ public class Room {
         return temp;
     }
     //Gets and stuff
+    void setOnSolvePath() {onSolvePath = true;}
     int[] getCoord(){
         return new int[] {xCord, yCord};
     }
