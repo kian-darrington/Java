@@ -21,6 +21,7 @@ public class Room {
     void onPath(){onPath = true;}
     void offPath() {onPath = false;}
     void onNewPath() {onNewPath = true;}
+    void offNewPath() {onNewPath = false;}
     void assignNeighbors(Room[] r){
         neighbors = r;
     }
@@ -61,6 +62,30 @@ public class Room {
             t[N] = false;
         if (yCord == Y_ROOM -1)
             t[S] = false;
+    }
+    int[] edgeCheckReturn(){
+        boolean[] t = new boolean[] {true, true, true, true};
+        if (xCord == 0)
+            t[W] = false;
+        if (xCord == X_ROOM -1)
+            t[E] = false;
+        if (yCord == 0)
+            t[N] = false;
+        if (yCord == Y_ROOM -1)
+            t[S] = false;
+        int count = 0;
+        for (boolean b : t)
+            if (b)
+                count++;
+        int[] directions = new int[count];
+        count = 0;
+        for (int i = 0; i < t.length; i++) {
+            if (t[i]) {
+                directions[count] = i;
+                count++;
+            }
+        }
+        return directions;
     }
     //Generates a number of how many rooms you can move into currently
     void numMoveCheck(){

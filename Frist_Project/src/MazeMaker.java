@@ -12,8 +12,11 @@ public class MazeMaker {
     //Used for printing the maze
     public static final char block = 0x2588;
 
+    boolean generatedMaze = false;
+
     //Gives the rooms the information they need to know about themselves
     void setUpRooms(){
+        generatedMaze = false;
         for(int i =0; i < X_ROOMS; i++){
             for (int o = 0; o < Y_ROOMS; o++){
                 rooms[i][o] = new Room();
@@ -131,6 +134,8 @@ public class MazeMaker {
     }
     //Populates the maze with paths
     public Room[][] randDepthFirstSearch(){
+        if (generatedMaze)
+            setUpRooms();
         cornerExit();
         int[] coord = new int[] {rand.nextInt(X_ROOMS), rand.nextInt(Y_ROOMS)}; //I used to have it be x and y, but for code simplicity it is now coord[0] coord[1]
         ArrayList<Room> unConnected = new ArrayList<>();
@@ -173,8 +178,40 @@ public class MazeMaker {
                 }
             }
         }
+        generatedMaze = true;
         return rooms;
     }
+    public Room[][] wilsonMaze(){
+        if (generatedMaze)
+            setUpRooms();
+        cornerExit();
+        int[] coord = new int[] {rand.nextInt(X_ROOMS), rand.nextInt(Y_ROOMS)}; //I used to have it be x and y, but for code simplicity it is now coord[0] coord[1]
+        ArrayList<Room> unConnected = new ArrayList<>();
+        for (int i = 0; i < X_ROOMS; i++)
+            for (int o = 0; o < Y_ROOMS; o++)
+                unConnected.add(rooms[i][o]);
+
+        ArrayList<Room> currentRooms = new ArrayList<>();
+        Room first = rooms[coord[0]][coord[1]];
+        first.onPath();
+        unConnected.remove(first);
+        while (!unConnected.isEmpty()) {
+            Room current = unConnected.get(rand.nextInt(unConnected.size()));
+            while (!current.getPath()) {
+                if (current.getNewPath()){
+
+                }
+                current.onNewPath();
+                currentRooms.add(current);
+
+                int[] directions = current.edgeCheckReturn();
+                alterCoord(coord, directions[rand.nextInt(directions.length)]);
+                current = rooms[coord[0]][coord[1]];
+            }
+        }
+        return rooms;
+    }
+
     //Prints the maze to the screen
     public void printMaze(){
         for (int i = 0; i < Y_ROOMS * 2 + 1; i++){
