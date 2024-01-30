@@ -65,14 +65,9 @@ public class Room {
     }
     int[] edgeCheckReturn(){
         boolean[] t = new boolean[] {true, true, true, true};
-        if (xCord == 0)
-            t[W] = false;
-        if (xCord == X_ROOM -1)
-            t[E] = false;
-        if (yCord == 0)
-            t[N] = false;
-        if (yCord == Y_ROOM -1)
-            t[S] = false;
+
+        edgeCheck(t);
+
         int count = 0;
         for (boolean b : t)
             if (b)

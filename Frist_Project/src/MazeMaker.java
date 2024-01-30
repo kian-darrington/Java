@@ -191,24 +191,38 @@ public class MazeMaker {
             for (int o = 0; o < Y_ROOMS; o++)
                 unConnected.add(rooms[i][o]);
 
-        ArrayList<Room> currentRooms = new ArrayList<>();
         Room first = rooms[coord[0]][coord[1]];
         first.onPath();
         unConnected.remove(first);
         while (!unConnected.isEmpty()) {
+            ArrayList<Room> currentRooms = new ArrayList<>();
             Room current = unConnected.get(rand.nextInt(unConnected.size()));
             while (!current.getPath()) {
+                System.out.println(coord[0] + " " + coord[1]);
                 if (current.getNewPath()){
-
+                    final int snipTo =  currentRooms.indexOf(current);
+                    for (int i = currentRooms.size() - 1; snipTo <= i;) {
+                        i = currentRooms.size() - 1;
+                        currentRooms.get(i).reset();
+                        currentRooms.remove(i);
+                    }
+                    if (currentRooms.size() > 0)
+                        alterSurrounding(currentRooms.get(currentRooms.size()-1));
                 }
                 current.onNewPath();
                 currentRooms.add(current);
 
                 int[] directions = current.edgeCheckReturn();
-                alterCoord(coord, directions[rand.nextInt(directions.length)]);
+                int dir = directions[rand.nextInt(directions.length)];
+                alterSurrounding(current, dir);
+                alterCoord(coord, dir);
                 current = rooms[coord[0]][coord[1]];
             }
+            for (Room r : currentRooms)
+                r.onPath();
+            unConnected.removeIf(Room::getPath);
         }
+        generatedMaze = true;
         return rooms;
     }
 
