@@ -60,27 +60,29 @@ public class Room {
             t[E] = false;
         if (yCord == 0)
             t[N] = false;
-        if (yCord == Y_ROOM -1)
+        if (yCord == Y_ROOM - 1)
             t[S] = false;
     }
     int[] edgeCheckReturn(){
-        boolean[] t = new boolean[] {true, true, true, true};
+        boolean[] ableToChange = new boolean[4];
 
-        edgeCheck(t);
+        for (int i = 0; i < 4; i++)
+            ableToChange[i] = !canMove[i];
+        edgeCheck(ableToChange);
+        //System.out.println(Arrays.toString(ableToChange));
+        int pathNum = 0;
+        for (boolean t : ableToChange)
+            if (t)
+                pathNum++;
+
+        int[] alterable = new int[pathNum];
 
         int count = 0;
-        for (boolean b : t)
-            if (b)
-                count++;
-        int[] directions = new int[count];
-        count = 0;
-        for (int i = 0; i < t.length; i++) {
-            if (t[i]) {
-                directions[count] = i;
-                count++;
-            }
-        }
-        return directions;
+        for(int i = 0; i < ableToChange.length; i++)
+            if (ableToChange[i])
+                alterable[count++] = i;
+
+        return alterable;
     }
     //Generates a number of how many rooms you can move into currently
     void numMoveCheck(){
@@ -110,6 +112,12 @@ public class Room {
         X_ROOM = 0;
         Y_ROOM = 0;
     }
+    void roomWipe(){
+        canMove = new boolean[] {false, false, false, false};
+        onPath = false;
+        onNewPath = false;
+    }
+
     public int numMove(){ return numMove; }
     //Returns an array of the possible directions for which a maze maker could travel/create new paths
     public int[] alterablePathsInt(){
@@ -227,9 +235,11 @@ public class Room {
             return "S";
         else if (onSolvePath)
             return "*";
+        else if (onPath)
+            return " ";
+        else if (onNewPath)
+            return "N";
         else {
-            //if (onNewPath)
-            //    return "N";
             return " ";
             //return "" + xCord % 10; //Debug
         }

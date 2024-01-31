@@ -4,6 +4,8 @@ public class MazeMaker {
     //Default dimensions for the maze, they are changed by the user later
     public static int X_ROOMS = 9;
     public static int Y_ROOMS = 9;
+    public static final int[] INVERSE = { 2, 3, 0, 1 };
+    public static final char[] DIRECTIONS = {'N', 'E', 'S', 'W'};
     private static final Random rand = new Random();
     //The maze as a 2D array of rooms
     private static Room[][] rooms = new Room[X_ROOMS][Y_ROOMS];
@@ -65,6 +67,7 @@ public class MazeMaker {
     }
     void alterSurrounding(Room room, int direction){
         int x = room.xCord, y = room.yCord;
+        rooms[x][y].changeMove(direction, true);
         boolean[] temp = rooms[x][y].getMove();
         if (x != 0 && direction == W)
             rooms[x - 1][y].changeMove(E, temp[W]);
@@ -140,8 +143,7 @@ public class MazeMaker {
         int[] coord = new int[] {rand.nextInt(X_ROOMS), rand.nextInt(Y_ROOMS)}; //I used to have it be x and y, but for code simplicity it is now coord[0] coord[1]
         ArrayList<Room> unConnected = new ArrayList<>();
         for (int i = 0; i < X_ROOMS; i++)
-            for (int o = 0; o < Y_ROOMS; o++)
-                    unConnected.add(rooms[i][o]);
+            unConnected.addAll(Arrays.asList(rooms[i]).subList(0, Y_ROOMS));
 
         ArrayList<Room> currentRooms = new ArrayList<>();
         //Makes the initial path to exit
@@ -188,8 +190,7 @@ public class MazeMaker {
         int[] coord = new int[] {rand.nextInt(X_ROOMS), rand.nextInt(Y_ROOMS)}; //I used to have it be x and y, but for code simplicity it is now coord[0] coord[1]
         ArrayList<Room> unConnected = new ArrayList<>();
         for (int i = 0; i < X_ROOMS; i++)
-            for (int o = 0; o < Y_ROOMS; o++)
-                unConnected.add(rooms[i][o]);
+            unConnected.addAll(Arrays.asList(rooms[i]).subList(0, Y_ROOMS));
 
         Room first = rooms[coord[0]][coord[1]];
         first.onPath();
@@ -197,20 +198,30 @@ public class MazeMaker {
         while (!unConnected.isEmpty()) {
             ArrayList<Room> currentRooms = new ArrayList<>();
             Room current = unConnected.get(rand.nextInt(unConnected.size()));
+            coord = current.getCoord();
             while (!current.getPath()) {
-                System.out.println(coord[0] + " " + coord[1]);
                 if (current.getNewPath()){
-                    final int snipTo =  currentRooms.indexOf(current);
-                    for (int i = currentRooms.size() - 1; snipTo <= i;) {
+                    //printMaze();
+                    final int snipTo =  currentRooms.indexOf(current) + 1;
+                    for (int i = currentRooms.size() - 1; snipTo < i;) {
                         i = currentRooms.size() - 1;
-                        currentRooms.get(i).reset();
-                        currentRooms.remove(i);
+                        if (i >= 0) {
+                            currentRooms.get(i).roomWipe();
+                            currentRooms.remove(i);
+                        }
                     }
-                    if (currentRooms.size() > 0)
-                        alterSurrounding(currentRooms.get(currentRooms.size()-1));
+                    if (currentRooms.size() > 0) {
+                        //alterSurrounding(currentRooms.get(currentRooms.size() - 1));
+                        currentRooms.get(currentRooms.size() - 1).roomWipe();
+                        currentRooms.get(currentRooms.size() - 1).onNewPath();
+                        if  (currentRooms.size() > 2)
+                            alterSurrounding(currentRooms.get(currentRooms.size() - 2));
+                    }
+                    //System.out.println("\n\n\n\n\n");
+                    //printMaze();
                 }
-                current.onNewPath();
                 currentRooms.add(current);
+                current.onNewPath();
 
                 int[] directions = current.edgeCheckReturn();
                 int dir = directions[rand.nextInt(directions.length)];
@@ -218,6 +229,8 @@ public class MazeMaker {
                 alterCoord(coord, dir);
                 current = rooms[coord[0]][coord[1]];
             }
+            //System.out.println("Connected!");
+            //printMaze();
             for (Room r : currentRooms)
                 r.onPath();
             unConnected.removeIf(Room::getPath);
