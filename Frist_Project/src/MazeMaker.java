@@ -157,7 +157,7 @@ public class MazeMaker {
                 int[] tempCoord = coord.clone();
                 //If the given room does not have a path to create, it will backtrack
                 if (direction.length < 1) {
-                    System.out.println(currentRooms.size());
+                    //System.out.println(currentRooms.size());
                     coord = currentRooms.remove(currentRooms.size()-1).getCoord();
                     break;
                 }
@@ -199,6 +199,7 @@ public class MazeMaker {
             ArrayList<Room> currentRooms = new ArrayList<>();
             Room current = unConnected.get(rand.nextInt(unConnected.size()));
             coord = current.getCoord();
+            int from = 0;
             while (!current.getPath()) {
                 if (current.getNewPath()){
                     //printMaze();
@@ -220,11 +221,13 @@ public class MazeMaker {
                     //System.out.println("\n\n\n\n\n");
                     //printMaze();
                 }
-                currentRooms.add(current);
+                if (!current.getNewPath())
+                    currentRooms.add(current);
                 current.onNewPath();
 
-                int[] directions = current.edgeCheckReturn();
+                int[] directions = current.edgeCheckReturn(from);
                 int dir = directions[rand.nextInt(directions.length)];
+                from = INVERSE[dir];
                 alterSurrounding(current, dir);
                 alterCoord(coord, dir);
                 current = rooms[coord[0]][coord[1]];
@@ -235,6 +238,22 @@ public class MazeMaker {
                 r.onPath();
             unConnected.removeIf(Room::getPath);
         }
+        for (Room[] r : rooms)
+            for (Room room : r)
+                alterSurrounding(room);
+        ArrayList<Room> Lazy = new ArrayList<>();
+        for (Room[] r : rooms)
+            for (Room room : r){
+                boolean g = false;
+                for (boolean b : room.getMove())
+                    if (b)
+                        g = true;
+                if (!g)
+                    Lazy.add(room);
+            }
+        System.out.println(Lazy.size());
+        for (Room room : Lazy)
+            alterSurrounding(room, room.randAltDirection());
         generatedMaze = true;
         return rooms;
     }

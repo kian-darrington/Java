@@ -63,6 +63,28 @@ public class Room {
         if (yCord == Y_ROOM - 1)
             t[S] = false;
     }
+    int[] edgeCheckReturn(int from){
+        boolean[] ableToChange = new boolean[4];
+
+        for (int i = 0; i < 4; i++)
+            ableToChange[i] = !canMove[i];
+        edgeCheck(ableToChange);
+        ableToChange[from] = false;
+        //System.out.println(Arrays.toString(ableToChange));
+        int pathNum = 0;
+        for (boolean t : ableToChange)
+            if (t)
+                pathNum++;
+
+        int[] alterable = new int[pathNum];
+
+        int count = 0;
+        for(int i = 0; i < ableToChange.length; i++)
+            if (ableToChange[i])
+                alterable[count++] = i;
+
+        return alterable;
+    }
     int[] edgeCheckReturn(){
         boolean[] ableToChange = new boolean[4];
 
@@ -143,6 +165,10 @@ public class Room {
                 alterable[count++] = i;
 
         return alterable;
+    }
+    int randAltDirection(){
+        int[] temp = edgeCheckReturn();
+        return temp[rand.nextInt(temp.length)];
     }
     //Returns an array of the possible directions for which a maze maker could travel/create new paths, accounting for neighbors not yet on the traditional path
     public int[] alterablePathsIntCleanUp(){
