@@ -16,6 +16,7 @@ public class MazeSolver{
     public void solveMaze(){
         solveMaze(new int[] {0,0}, S);
     }
+    public void distanceAssigner() { distanceAssigner(new int[] {0, 0}, S, 0); }
     Room[][] getMaze(){return rooms;}
     int[] alterCoord(int[] tempCoord, int moveTo){
         switch (moveTo) {
@@ -77,5 +78,37 @@ public class MazeSolver{
             }
         }
         return false;
+    }
+    private void distanceAssigner(int[] coord, int directionFrom, int distance){
+        Room room = rooms[coord[0]][coord[1]];
+        //System.out.println(coord[0] + " " + coord[1]);
+        room.setDistance(distance);
+        boolean[] availablePaths = room.getMove().clone();
+
+        //Stops from going backward
+        if (availablePaths[inverse[directionFrom]])
+            availablePaths[inverse[directionFrom]] = false;
+        int pathsAvailable = 0;
+        //Gets the number of possible moves
+        for (boolean b : availablePaths)
+            if (b)
+                pathsAvailable++;
+        //
+        if (pathsAvailable == 0)
+            return;
+        int[] direction = new int[pathsAvailable];
+        ArrayList<Integer> temp = new ArrayList<>();
+        for (int i = 0; i < availablePaths.length; i++)
+            if (availablePaths[i])
+                temp.add(i);
+
+        for (int i = 0; i < pathsAvailable; i++) {
+            direction[i] = temp.remove(rand.nextInt(temp.size()));
+        }
+        for (int i = 0; i < pathsAvailable; i++){
+            int[] newCoord = alterCoord(coord.clone(), direction[i]);
+            distanceAssigner(newCoord, direction[i], distance + 1);
+        }
+        return;
     }
 }

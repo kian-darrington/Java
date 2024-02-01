@@ -4,6 +4,8 @@ public class Room {
     //Gets some information from the original class, should have set this up in the Constructor
     int X_ROOM = 0;
     int Y_ROOM = 0;
+    public static final char block = 0x2588;
+    int distanceFromStart;
     //establishes necessary variables
     int numMove = 4, timesSeen = 0;
     int xCord;
@@ -26,6 +28,7 @@ public class Room {
         neighbors = r;
     }
     int getTimesSeen(){return timesSeen;}
+    void setDistance(int num) {distanceFromStart = num;}
     //default Constructor
     Room(){ reset(); }
     //Constructor which allows for the copying of a room
@@ -262,14 +265,52 @@ public class Room {
         else if (onSolvePath)
             return "*";
         else if (onPath)
-            return " ";
+            //return "&nbsp;";
+            return "<font color='" +hslToHexColor(distanceFromStart % 360)+"'>" + block + "</font>";
         else if (onNewPath)
             return "N";
         else {
-            return " ";
+            return "&nbsp;";
             //return "" + xCord % 10; //Debug
         }
     }
+    public String color(){
+        return "<font color='" +hslToHexColor(distanceFromStart % 360)+"'>" + block + "</font>";
+    }
+    public static String hslToHexColor(int hue) {
+        float huePrime = hue / 60f;
+        float X = 1 - Math.abs(huePrime % 2 - 1);
+
+        int red, green, blue;
+        if (huePrime < 1) {
+            red = 255;
+            green = (int) (255 * X);
+            blue = 0;
+        } else if (huePrime < 2) {
+            red = (int) (255 * X);
+            green = 255;
+            blue = 0;
+        } else if (huePrime < 3) {
+            red = 0;
+            green = 255;
+            blue = (int) (255 * X);
+        } else if (huePrime < 4) {
+            red = 0;
+            green = (int) (255 * X);
+            blue = 255;
+        } else if (huePrime < 5) {
+            red = (int) (255 * X);
+            green = 0;
+            blue = 255;
+        } else {
+            red = 255;
+            green = 0;
+            blue = (int) (255 * X);
+        }
+
+        return String.format("#%02X%02X%02X", red, green, blue);
+    }
+
     public boolean[] getMove() { return canMove; }
     //Returns the legal moves that have been determined for the sake of solving
     public int[] getDirections() {

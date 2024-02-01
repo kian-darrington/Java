@@ -36,10 +36,9 @@ public class Maze {
             System.out.println();
         }
     }
-    public ArrayList<String> stringMaze(){
-        ArrayList<String> strings= new ArrayList<>();
+    public String stringMaze(){
+        StringBuilder string = new StringBuilder();
         for (int i = 0; i < Y_ROOMS * 2 + 1; i++){
-            StringBuilder string = new StringBuilder();
             for (int o = 0; o < X_ROOMS * 2 + 1; o++){
                 if (o % 2 == 0 && i % 2 == 0)
                     string.append(block);
@@ -53,42 +52,47 @@ public class Maze {
                     }
                 }
             }
-            strings.add(string.toString());
+            if (i == 0)
+                string.insert(0,"<html>");
+            if (i == Y_ROOMS * 2)
+                string.append("<html>");
+            else
+                string.append("<br>");
         }
-        return strings;
+        return string.toString();
     }
     //Checks the current room and down neighbor path of a room to determine what is printed
-    char upDownCheck(int x, int y){
+    String upDownCheck(int x, int y){
         if (y == 0)
-            return block;
+            return ""+block;
         else if (y == Y_ROOMS)
-            return block;
+            return ""+block;
         else if (y == Y_ROOMS - 1){
             if (rooms[x][y].getMove(N))
-                return ' ';
+                return rooms[x][y].color();
             else
-                return block;
+                return ""+block;
         }
         else if (rooms[x][y].getMove(N) && rooms[x][y - 1].getMove(S))
-            return ' ';
+            return rooms[x][y].color();
         else
-            return block;
+            return ""+block;
     }
     //Checks the current room and left neighbor path of a room to determine what is printed
-    char sideSideCheck(int x, int y){
+    String sideSideCheck(int x, int y){
         if (x == 0)
-            return block;
+            return ""+block;
         else if (x == X_ROOMS)
-            return block;
+            return ""+block;
         else if (x == X_ROOMS - 1) {
             if (rooms[x][y].getMove(W))
-                return ' ';
+                return rooms[x][y].color();
             else
-                return block;
+                return ""+block;
         }
         else if (rooms[x][y].getMove(W) && rooms[x - 1][y].getMove(E))
-            return ' ';
+            return rooms[x][y].color();
         else
-            return block;
+            return ""+block;
     }
 }
