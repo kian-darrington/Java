@@ -1,3 +1,5 @@
+import java.util.ArrayList;
+
 public class Maze {
     Room[][] rooms;
     final int N = 0, E = 1, S = 2, W = 3;
@@ -33,6 +35,27 @@ public class Maze {
             }
             System.out.println();
         }
+    }
+    public ArrayList<String> stringMaze(){
+        ArrayList<String> strings= new ArrayList<>();
+        for (int i = 0; i < Y_ROOMS * 2 + 1; i++){
+            StringBuilder string = new StringBuilder();
+            for (int o = 0; o < X_ROOMS * 2 + 1; o++){
+                if (o % 2 == 0 && i % 2 == 0)
+                    string.append(block);
+                else if (o % 2 == 1 && i % 2 == 1)
+                    string.append(rooms[o / 2][i / 2]);
+                else{
+                    if (i % 2 == 0)
+                        string.append(upDownCheck(o /2, i / 2));
+                    else {
+                        string.append(sideSideCheck(o /2, i / 2));
+                    }
+                }
+            }
+            strings.add(string.toString());
+        }
+        return strings;
     }
     //Checks the current room and down neighbor path of a room to determine what is printed
     char upDownCheck(int x, int y){

@@ -39,6 +39,8 @@ public class MazeSolver{
     private boolean solveMaze(int[] coord, int directionFrom){
         Room room = rooms[coord[0]][coord[1]];
         //System.out.println(coord[0] + " " + coord[1]);
+
+        //Default true statement
         if (room.getExit()) {
             room.setOnSolvePath();
             System.out.println("Found the Exit!");
@@ -47,12 +49,15 @@ public class MazeSolver{
 
         boolean[] availablePaths = room.getMove().clone();
 
+        //Stops from going backward
         if (availablePaths[inverse[directionFrom]])
             availablePaths[inverse[directionFrom]] = false;
         int pathsAvailable = 0;
+        //Gets the number of possible moves
         for (boolean b : availablePaths)
             if (b)
                 pathsAvailable++;
+        //
         if (pathsAvailable == 0)
             return false;
         int[] direction = new int[pathsAvailable];

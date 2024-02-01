@@ -1,3 +1,4 @@
+import java.awt.*;
 import java.util.*;
 //This class makes a maze and can print it too
 public class MazeMaker {
@@ -13,7 +14,7 @@ public class MazeMaker {
     public static final int N = 0, E = 1, S = 2, W = 3;
     //Used for printing the maze
     public static final char block = 0x2588;
-
+    static final Scanner console = new Scanner(System.in);
     boolean generatedMaze = false;
 
     //Gives the rooms the information they need to know about themselves
@@ -199,10 +200,12 @@ public class MazeMaker {
             ArrayList<Room> currentRooms = new ArrayList<>();
             Room current = unConnected.get(rand.nextInt(unConnected.size()));
             coord = current.getCoord();
+            String useless;
             int from = 0;
             while (!current.getPath()) {
                 if (current.getNewPath()){
                     //printMaze();
+                    //useless = console.nextLine();
                     final int snipTo =  currentRooms.indexOf(current) + 1;
                     for (int i = currentRooms.size() - 1; snipTo < i;) {
                         i = currentRooms.size() - 1;
@@ -211,15 +214,17 @@ public class MazeMaker {
                             currentRooms.remove(i);
                         }
                     }
+                    //System.out.println(currentRooms.size());
                     if (currentRooms.size() > 0) {
                         //alterSurrounding(currentRooms.get(currentRooms.size() - 1));
                         currentRooms.get(currentRooms.size() - 1).roomWipe();
                         currentRooms.get(currentRooms.size() - 1).onNewPath();
-                        if  (currentRooms.size() > 2)
+                        if  (currentRooms.size() > 1)
                             alterSurrounding(currentRooms.get(currentRooms.size() - 2));
                     }
                     //System.out.println("\n\n\n\n\n");
                     //printMaze();
+                    //useless = console.nextLine();
                 }
                 if (!current.getNewPath())
                     currentRooms.add(current);
@@ -234,13 +239,11 @@ public class MazeMaker {
             }
             //System.out.println("Connected!");
             //printMaze();
+            //useless = console.nextLine();
             for (Room r : currentRooms)
                 r.onPath();
             unConnected.removeIf(Room::getPath);
         }
-        for (Room[] r : rooms)
-            for (Room room : r)
-                alterSurrounding(room);
         ArrayList<Room> Lazy = new ArrayList<>();
         for (Room[] r : rooms)
             for (Room room : r){
@@ -282,6 +285,28 @@ public class MazeMaker {
                 System.out.println(Arrays.toString(rooms[o][i].canMove));
             }
         }*/ //for Debug
+    }
+
+    public ArrayList<String> stringMaze(){
+        ArrayList<String> strings= new ArrayList<>();
+        for (int i = 0; i < Y_ROOMS * 2 + 1; i++){
+            StringBuilder string = new StringBuilder();
+            for (int o = 0; o < X_ROOMS * 2 + 1; o++){
+                if (o % 2 == 0 && i % 2 == 0)
+                    string.append(block);
+                else if (o % 2 == 1 && i % 2 == 1)
+                    string.append(rooms[o / 2][i / 2]);
+                else{
+                    if (i % 2 == 0)
+                        string.append(upDownCheck(o /2, i / 2));
+                    else {
+                        string.append(sideSideCheck(o /2, i / 2));
+                    }
+                }
+            }
+            strings.add(string.toString());
+        }
+        return strings;
     }
     //Checks the current room and down neighbor path of a room to determine what is printed
     char upDownCheck(int x, int y){
