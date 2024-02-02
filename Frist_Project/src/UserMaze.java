@@ -5,8 +5,8 @@ import java.util.ArrayList;
 
 public class UserMaze {
     public static void main(String[] args) {
-        MazeMaker mazeMaker = new MazeMaker(90, 40);
-        Maze maze = new Maze(mazeMaker.wilsonMaze());
+        MazeMaker mazeMaker = new MazeMaker(70, 70);
+        Maze maze = new Maze(mazeMaker.randDepthFirstSearch());
         String unsolved = maze.stringMaze();
         MazeSolver answer = new MazeSolver(maze);
         answer.distanceAssigner();
@@ -16,7 +16,7 @@ public class UserMaze {
         frame.setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
         frame.setSize(1000, 1000);
 
-        Font font = new Font("Menlo", Font.PLAIN, 9);
+        Font font = new Font("Consolas", Font.PLAIN, 10);
         AffineTransform transform = new AffineTransform();
         transform.scale(1.75, 1.0); // Adjust the scaling factors as needed
         Font stretchedFont = font.deriveFont(transform);
@@ -25,7 +25,7 @@ public class UserMaze {
         panel.setBackground(Color.BLACK);
         panel.setFont(stretchedFont);
         frame.add(panel);
-        String mazeLines = solvedMaze.stringMaze();
+        String mazeLines = solvedMaze.justRooms();
 
         // Apply horizontal and vertical scaling
 

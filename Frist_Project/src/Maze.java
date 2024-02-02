@@ -36,6 +36,21 @@ public class Maze {
             System.out.println();
         }
     }
+    public String justRooms(){
+        StringBuilder string = new StringBuilder();
+        for (int i = 0; i < Y_ROOMS; i++){
+            for (int o = 0; o < X_ROOMS; o++){
+                string.append(rooms[o][i]);
+            }
+            if (i == 0)
+                string.insert(0,"<html>");
+            if (i == Y_ROOMS)
+                string.append("<html>");
+            else
+                string.append("<br>");
+        }
+        return string.toString();
+    }
     public String stringMaze(){
         StringBuilder string = new StringBuilder();
         for (int i = 0; i < Y_ROOMS * 2 + 1; i++){
