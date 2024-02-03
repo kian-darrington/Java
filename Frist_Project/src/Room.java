@@ -266,11 +266,11 @@ public class Room {
             return "*";
         else if (onPath)
             //return "&nbsp;";
-            return "<font color='" +hslToHexColor(distanceFromStart % 360)+"'>" + block + "</font>";
+            return " ";
         else if (onNewPath)
             return "N";
         else {
-            return "&nbsp;";
+            return " ";
             //return "" + xCord % 10; //Debug
         }
     }

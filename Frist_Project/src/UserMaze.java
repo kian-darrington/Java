@@ -5,9 +5,9 @@ import java.util.ArrayList;
 
 public class UserMaze {
     public static void main(String[] args) {
-        MazeMaker mazeMaker = new MazeMaker(70, 70);
+        MazeMaker mazeMaker = new MazeMaker(50, 34);
         Maze maze = new Maze(mazeMaker.randDepthFirstSearch());
-        String unsolved = maze.stringMaze();
+        ArrayList<String> unsolved = maze.stringMaze();
         MazeSolver answer = new MazeSolver(maze);
         answer.distanceAssigner();
         Maze solvedMaze = new Maze(answer.getMaze());
@@ -24,8 +24,17 @@ public class UserMaze {
         JPanel panel = new JPanel(new FlowLayout(FlowLayout.CENTER, 0, -3));
         panel.setBackground(Color.BLACK);
         panel.setFont(stretchedFont);
-        frame.add(panel);
+        JPanel panel2 = new JPanel(new FlowLayout(FlowLayout.CENTER, 0, -3));
+        panel2.setBackground(Color.BLACK);
+        panel2.setFont(stretchedFont);
+        frame.add(panel2);
         String mazeLines = solvedMaze.justRooms();
+        for (int i = 0; i < unsolved.size(); i++) {
+            JLabel label2 = new JLabel(unsolved.get(i));
+            label2.setFont(stretchedFont);
+            label2.setForeground(Color.WHITE); // Set the color of the font
+            panel2.add(label2);
+        }
 
         // Apply horizontal and vertical scaling
 
