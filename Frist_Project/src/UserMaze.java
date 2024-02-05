@@ -16,7 +16,7 @@ public class UserMaze {
         frame.setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
         frame.setSize(1000, 1000);
 
-        Font font = new Font("Consolas", Font.PLAIN, 10);
+        Font font = new Font("Menlo", Font.PLAIN, 10); //Consolas for windows, Menlo for Mac
         AffineTransform transform = new AffineTransform();
         transform.scale(1.75, 1.0); // Adjust the scaling factors as needed
         Font stretchedFont = font.deriveFont(transform);
@@ -27,8 +27,8 @@ public class UserMaze {
         JPanel panel2 = new JPanel(new FlowLayout(FlowLayout.CENTER, 0, -3));
         panel2.setBackground(Color.BLACK);
         panel2.setFont(stretchedFont);
-        frame.add(panel2);
-        String mazeLines = solvedMaze.justRooms();
+        frame.add(panel);
+        String mazeLines = solvedMaze.colorMaze();
         for (int i = 0; i < unsolved.size(); i++) {
             JLabel label2 = new JLabel(unsolved.get(i));
             label2.setFont(stretchedFont);
