@@ -19,6 +19,19 @@ public class Levenshtein {
         }
         return words;
     }
+    public static ArrayList<byte[]> getAlphaWords() {
+        ArrayList<byte[]> words = new ArrayList<>();
+        Scanner f;
+        try {
+            f = new Scanner(new File("src/dictionaryCatDog.txt"));
+        } catch (FileNotFoundException e) {
+            throw new RuntimeException(e);
+        }
+        while (f.hasNext()) {
+            words.add(f.next().toLowerCase().getBytes());
+        }
+        return words;
+    }
 
     public static void main(String[] args) {
         System.out.println("Input your two words:");
@@ -37,11 +50,12 @@ public class Levenshtein {
     static boolean findDistance(String word1, String word2){
         ArrayList<String> previousChoices = new ArrayList<>();
         previousChoices.add(word1);
-        int start = startingIndex(word1.length(), 0, dictionary.size() - 1);
-        int finish = endingIndex(word1.length(), 0, dictionary.size() - 1);
-        ArrayList<String> possible = new ArrayList<>(dictionary.subList(start, finish + 1));
-        possible.removeIf(s -> s.compareTo(word1) == -1);
-        System.out.println(possible);
+        int bigStart = startingIndex(word1.length(), 0, dictionary.size() - 1);
+        int bigFinish = endingIndex(word1.length(), bigStart, dictionary.size() - 1);
+        ArrayList<String> possible = new ArrayList<>(dictionary.subList(bigStart, bigFinish + 1));
+        int first = firstIndex(word1.length(), bigStart, possible.size() - 1, possible);
+        int last = lastIndex(word1.length(), first, possible.size() - 1, possible);
+        System.out.println(first +" "+ last + ", " + bigStart + " " + bigFinish);
         return false;
     }
     ArrayList<String> binarySearchLength(int length){
@@ -68,6 +82,28 @@ public class Levenshtein {
             return endingIndex(length, start, mid);
         } else
             return endingIndex(length, mid, finish);
+    }
+    static int firstIndex(int length, int start, int finish, ArrayList<String> current){
+        int mid = (start + finish) / 2;
+        if (mid == 0)
+            return 0;
+        if ((current.get(mid).length() == current.get(mid - 1).length() + 1) && current.get(mid).length() == length) {
+            return mid;
+        } else if (current.get(mid).length() > length - 1) {
+            return firstIndex(length, start, mid, current);
+        } else
+            return firstIndex(length, mid, finish, current);
+    }
+    static int lastIndex(int length, int start, int finish, ArrayList<String> current){
+        int mid = (start + finish) / 2;
+        if (mid + 1 == current.size() - 1)
+            return mid + 1;
+        if ((current.get(mid).length() == current.get(mid + 1).length() - 1) && current.get(mid).length() == length) {
+            return mid;
+        } else if (current.get(mid).length() > length) {
+            return lastIndex(length, start, mid, current);
+        } else
+            return lastIndex(length, mid, finish, current);
     }
     int compareStrings(String word1, String word2){
         return 0;
