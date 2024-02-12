@@ -10,7 +10,7 @@ public class WordsToAlphaNum {
         ArrayList<String> words = new ArrayList<>();
         Scanner f;
         try {
-            f = new Scanner(new File("src/dictionaryCatDog.txt"));
+            f = new Scanner(new File("src/alphaCatDog.txt"));
         } catch (FileNotFoundException e) {
             throw new RuntimeException(e);
         }
@@ -43,13 +43,10 @@ public class WordsToAlphaNum {
             wordBytes[i] = words.get(i).getBytes();
         }
         System.out.println(Arrays.toString("z".getBytes()));
-        String dog = "dog";
-        byte[] dogStuff = dog.getBytes();
-        int dogTotal = total(dogStuff);
+        String dog = "dgo";
         for (int i = 0; i < words.size(); i++){
-            if (Math.abs(dogTotal - total(wordBytes[i])) < 26){
-                System.out.println(i);
-            }
+            if (misMatch(dog, words.get(i)))
+                System.out.println(words.get(i));
             //System.out.println(Math.abs(dogTotal - total(wordBytes[i])));
         }
     }
@@ -59,11 +56,25 @@ public class WordsToAlphaNum {
             sum += b;
         return sum;
     }
-    int misMatch(String word1, String word2){
-        int w1Max = word1.length(), w2Max = word2.length();
-        for (int i = 0; i < w1Max; i++){
-
+    //MUST be inputted with alphanumerical Strings
+    static boolean misMatch(String word1, String word2){
+        int difference = 0, w1count = 0, w2count = 0;
+        byte[] w1 = word1.getBytes(), w2 = word2.getBytes();
+        while (w1count < word1.length() && w2count < word2.length()){
+            if (w1[w1count] == w2[w2count]) {
+                w1count++;
+                w2count++;
+            }
+            else{
+                difference++;
+                if (w1[w1count] < w2[w2count])
+                    w1count++;
+                else
+                    w2count++;
+            }
+            if (difference > 1)
+                return false;
         }
-        return 0;
+        return difference != 0;
     }
 }
