@@ -1,3 +1,5 @@
+package Mastermind;
+
 import java.sql.Ref;
 import java.util.*;
 import java.util.function.Predicate;

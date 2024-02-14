@@ -1,16 +1,17 @@
 import java.io.File;
 import java.io.FileNotFoundException;
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.Scanner;
 
 public class Levenshtein {
-    public static final ArrayList<String> dictionary = getWords();;
+    public static final ArrayList<String> dictionary = getWords();
     private static final Scanner console = new Scanner(System.in);
     public static ArrayList<String> getWords() {
         ArrayList<String> words = new ArrayList<>();
         Scanner f;
         try {
-            f = new Scanner(new File("src/dictionaryCatDog.txt"));
+            f = new Scanner(new File("src/dictionarySortedLength.txt"));
         } catch (FileNotFoundException e) {
             throw new RuntimeException(e);
         }
@@ -32,8 +33,19 @@ public class Levenshtein {
         }
         return words;
     }
-
+    static final int[] lengthStarts = startingIndexes();
+    static int[] startingIndexes(){
+        ArrayList<Integer> temp = new ArrayList<>();
+        temp.add(0);
+        for (int i = 2; i <= dictionary.get(dictionary.size()-1).length(); i++)
+            temp.add(firstIndex(i, temp.get(i - 2), dictionary.size()-1, dictionary));
+        int[] finish = new int[temp.size()];
+        for (int i = 0; i <temp.size(); i++)
+            finish[i] = temp.get(i);
+        return finish;
+    }
     public static void main(String[] args) {
+        System.out.println(Arrays.toString(lengthStarts));
         System.out.println("Input your two words:");
         String word1 = console.nextLine();
         String word2 = console.nextLine();

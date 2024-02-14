@@ -1,3 +1,5 @@
+package Mastermind;
+
 import java.sql.Array;
 import java.time.Clock;
 import java.util.ArrayList;

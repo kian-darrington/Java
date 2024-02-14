@@ -10,7 +10,7 @@ public class WordsToAlphaNum {
         ArrayList<String> words = new ArrayList<>();
         Scanner f;
         try {
-            f = new Scanner(new File("src/alphaCatDog.txt"));
+            f = new Scanner(new File("src/dictionarySortedLength.txt"));
         } catch (FileNotFoundException e) {
             throw new RuntimeException(e);
         }
@@ -19,11 +19,12 @@ public class WordsToAlphaNum {
         }
         return words;
     }
-    static byte[] characterOrganizer(String original){
+
+    static byte[] characterOrganizer(String original) {
         byte[] sequence = original.getBytes();
-        for (int i = 0; i < sequence.length; i++){
-            for (int o = 0; o < sequence.length; o++){
-                if (sequence[i] < sequence[o] && i > o){
+        for (int i = 0; i < sequence.length; i++) {
+            for (int o = 0; o < sequence.length; o++) {
+                if (sequence[i] < sequence[o] && i > o) {
                     byte temp = sequence[o];
                     sequence[o] = sequence[i];
                     sequence[i] = temp;
@@ -31,49 +32,72 @@ public class WordsToAlphaNum {
             }
         }
         char[] output = new char[sequence.length];
-        for (int i = 0; i < sequence.length; i++){
+        for (int i = 0; i < sequence.length; i++) {
             output[i] = (char) sequence[i];
         }
         return sequence;
     }
+
     public static void main(String[] args) {
+        long temp = System.nanoTime();
         ArrayList<String> words = getWords();
         byte[][] wordBytes = new byte[words.size()][];
-        for (int i = 0; i < words.size(); i ++){
+        for (int i = 0; i < words.size(); i++) {
             wordBytes[i] = words.get(i).getBytes();
         }
-        System.out.println(Arrays.toString("z".getBytes()));
-        String dog = "dgo";
-        for (int i = 0; i < words.size(); i++){
+        String dog = "dog";
+        int count = 0;
+        for (int i = 0; i < words.size(); i++) {
             if (misMatch(dog, words.get(i)))
-                System.out.println(words.get(i));
+                count++;
+                //System.out.println(words.get(i));
             //System.out.println(Math.abs(dogTotal - total(wordBytes[i])));
         }
+        System.out.println(count + " Time: " +(float)(System.nanoTime() - temp) / 1000000);
     }
-    static int total(byte[] bytes){
+
+    static int total(byte[] bytes) {
         int sum = 0;
         for (byte b : bytes)
             sum += b;
         return sum;
     }
-    //MUST be inputted with alphanumerical Strings
-    static boolean misMatch(String word1, String word2){
-        int difference = 0, w1count = 0, w2count = 0;
+
+    static boolean misMatch(String word1, String word2) {
+        int difference = 0;
         byte[] w1 = word1.getBytes(), w2 = word2.getBytes();
-        while (w1count < word1.length() && w2count < word2.length()){
-            if (w1[w1count] == w2[w2count]) {
-                w1count++;
-                w2count++;
+        if (word1.length() == word2.length()) {
+            for (int i = 0; i < w1.length; i++) {
+                if (w1[i] != w2[i]) {
+                    difference++;
+                    if (difference > 1)
+                        return false;
+                }
             }
-            else{
-                difference++;
-                if (w1[w1count] < w2[w2count])
-                    w1count++;
-                else
-                    w2count++;
+        }
+        else
+        {
+            if (word2.length() > word1.length()) {
+                byte[] temp = w1;
+                w1 = w2;
+                w2 = temp;
             }
-            if (difference > 1)
-                return false;
+            int count = 0;
+            for (int i = 0; i < w1.length; i++) {
+                if (count < w2.length) {
+                    if (w1[i] != w2[count]) {
+                        difference++;
+                        if (difference > 1)
+                            return false;
+                    } else
+                        count++;
+                }
+                else {
+                    difference++;
+                    if (difference > 1)
+                        return false;
+                }
+            }
         }
         return difference != 0;
     }
