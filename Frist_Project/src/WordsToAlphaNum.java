@@ -48,9 +48,7 @@ public class WordsToAlphaNum {
         String dog = "dog";
         int count = 0;
         for (int i = 0; i < words.size(); i++) {
-            if (misMatch(dog, words.get(i)))
-                count++;
-                //System.out.println(words.get(i));
+            System.out.println(i + 1 + ": " +misMatch(dog, words.get(i)));
             //System.out.println(Math.abs(dogTotal - total(wordBytes[i])));
         }
         System.out.println(count + " Time: " +(float)(System.nanoTime() - temp) / 1000000);
@@ -63,15 +61,13 @@ public class WordsToAlphaNum {
         return sum;
     }
 
-    static boolean misMatch(String word1, String word2) {
+    static int misMatch(String word1, String word2) {
         int difference = 0;
         byte[] w1 = word1.getBytes(), w2 = word2.getBytes();
         if (word1.length() == word2.length()) {
             for (int i = 0; i < w1.length; i++) {
                 if (w1[i] != w2[i]) {
                     difference++;
-                    if (difference > 1)
-                        return false;
                 }
             }
         }
@@ -87,18 +83,14 @@ public class WordsToAlphaNum {
                 if (count < w2.length) {
                     if (w1[i] != w2[count]) {
                         difference++;
-                        if (difference > 1)
-                            return false;
                     } else
                         count++;
                 }
                 else {
                     difference++;
-                    if (difference > 1)
-                        return false;
                 }
             }
         }
-        return difference != 0;
+        return difference;
     }
 }

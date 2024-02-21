@@ -5,9 +5,11 @@ import java.util.Arrays;
 import java.util.Scanner;
 
 public class Levenshtein {
-    public static final String FILENAME = "src/dictionarySortedLength.txt";
+    public static final String FILENAME = "src/dictionaryCatDog.txt";
     public static final ArrayList<Word> dictionary = getWords();
     private static final Scanner console = new Scanner(System.in);
+    static ArrayList<Word> words1 = null;
+    static ArrayList<Word> words2 = null;
     public static ArrayList<Word> getWords() {
         ArrayList<Word> words = new ArrayList<>();
         Scanner f;
@@ -65,10 +67,22 @@ public class Levenshtein {
         }
         System.out.println("Both words are A OK");
         System.out.println(findLocation(word1)+ " " + findLocation(word2));
-        ArrayList<ArrayList<Word>> paths = findDistance(word1, word2);
+        ArrayList<ArrayList<Word>> paths = findDistance(findLocation(word1), findLocation(word2));
     }
-    static ArrayList<ArrayList<Word>> findDistance(String word1, String word2){
+    static ArrayList<ArrayList<Word>> findDistance(int word1, int word2){
+        words1 = setDifference(word1);
+        words2 = setDifference(word2);
+
         return null;
+    }
+    static ArrayList<Word> setDifference(int word2){
+        Word ref = dictionary.get(word2);
+        ArrayList<Word> diff = new ArrayList<>();
+        for (Word w : dictionary){
+            int temp = numMisMatch(ref.toString(), w.toString());
+            diff.add(new Word(w, temp));
+        }
+        return diff;
     }
     int[] findDistanceRecurse(int word1, int word2, int currentShortest, int[] choices){
         int[] previousChoices = new int[1];
@@ -152,6 +166,38 @@ public class Levenshtein {
         }
         return difference != 0;
     }
+    static int numMisMatch(String word1, String word2){
+        int difference = 0;
+        byte[] w1 = word1.getBytes(), w2 = word2.getBytes();
+        if (word1.length() == word2.length()) {
+            for (int i = 0; i < w1.length; i++) {
+                if (w1[i] != w2[i]) {
+                    difference++;
+                }
+            }
+        }
+        else
+        {
+            if (word2.length() > word1.length()) {
+                byte[] temp = w1;
+                w1 = w2;
+                w2 = temp;
+            }
+            int count = 0;
+            for (int i = 0; i < w1.length; i++) {
+                if (count < w2.length) {
+                    if (w1[i] != w2[count]) {
+                        difference++;
+                    } else
+                        count++;
+                }
+                else {
+                    difference++;
+                }
+            }
+        }
+        return difference;
+    }
     static int findLocation(String word){
         int start = lengthStarts[word.length() - 1], end = lengthStarts[word.length()];
         for (int i = start; i < end; i++){
@@ -162,13 +208,26 @@ public class Levenshtein {
     }
 }
 class Word{
-    String word = null;
-    int location;
+    private final String word;
+    private final int location;
+    private int distance = 0;
     Word(String w, int l){
         word = w;
         location = l;
     }
+    Word (Word w){
+        word = w.word;
+        location = w.location;
+        distance = w.distance;
+    }
+    Word (Word w, int d){
+        word = w.word;
+        location = w.location;
+        distance = d;
+    }
+    void setDistance(int i) {distance = i;}
     int length() {return word.length();}
     int getLocation() {return location;}
+    int getDistance() {return distance;}
     public String toString() {return word;}
 }

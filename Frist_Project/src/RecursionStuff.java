@@ -83,8 +83,17 @@ public class RecursionStuff {
         else
             return fibonacci2(n, place, last2, last + last2);
     }
+    public static String writeSquares(int n){
+        if (n == 1)
+            return "1, ";
+        if (n % 2 == 1)
+            return (n * n) + ", " + writeSquares(n-2) + ", "+((n-1) * (n-1));
+        else
+            return ((n-1) * (n-1)) + ", " + writeSquares(n-2) +", " + (n * n);
+    }
+
     //Output stuff
     public static void main(String[] args) {
-        System.out.println(fibonacci(27));
+        System.out.println(writeSquares(8));
     }
 }
