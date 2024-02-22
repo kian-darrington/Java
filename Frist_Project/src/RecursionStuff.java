@@ -1,5 +1,8 @@
 //Made by Kian Darrington
 
+import java.util.ArrayList;
+import java.util.List;
+
 //Contains the entirety of Goal sheet 11 with individual functions being the answers to problems
 public class RecursionStuff {
     //Returns a string of * based upon 2^n where n is the input, subdivides for hopeful efficiency
@@ -85,15 +88,55 @@ public class RecursionStuff {
     }
     public static String writeSquares(int n){
         if (n == 1)
-            return "1, ";
+            return "1";
+        else if (n == 0)
+            return "";
         if (n % 2 == 1)
             return (n * n) + ", " + writeSquares(n-2) + ", "+((n-1) * (n-1));
+        else if (n > 2)
+            return ((n-1) * (n-1)) + ", " + writeSquares(n-2) + ", " + (n * n) ;
         else
-            return ((n-1) * (n-1)) + ", " + writeSquares(n-2) +", " + (n * n);
+            return "1, 4";
+    }
+    public static ArrayList<String> mergeSort(ArrayList<String> array){
+        if (array.size() > 1) {
+            ArrayList<String> left = new ArrayList<>(array.subList(0, array.size() / 2));
+            ArrayList<String> right = new ArrayList<>(array.subList(array.size() / 2, array.size()));
+
+            left = mergeSort(left);
+            right = mergeSort(right);
+            array = merge(left, right);
+            return array;
+        }
+        else {
+            return array;
+        }
+    }
+    private static ArrayList<String> merge(ArrayList<String> left, ArrayList<String> right){
+        ArrayList<String> result = new ArrayList<>();
+        int i = 0;
+        while (!left.isEmpty() && !right.isEmpty()){
+            if (left.get(0).toLowerCase().getBytes()[i] < right.get(0).toLowerCase().getBytes()[i]) {
+                result.add(left.remove(0));
+                i = 0;
+            }
+            else if (left.get(0).toLowerCase().getBytes()[i] > right.get(0).toLowerCase().getBytes()[i]) {
+                result.add(left.remove(0));
+                i = 0;
+            }
+            i++;
+        }
+        if (!left.isEmpty())
+            result.add(left.remove(0));
+        else if (!right.isEmpty())
+            result.add(right.remove(0));
+        System.out.println(result);
+        return result;
     }
 
     //Output stuff
     public static void main(String[] args) {
-        System.out.println(writeSquares(8));
+        ArrayList<String> temp = new ArrayList<>(List.of(new String[]{"boy", "bot", "wow", "abba", "soon"}));
+        System.out.println(mergeSort(temp));
     }
 }
