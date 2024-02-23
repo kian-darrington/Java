@@ -5,7 +5,7 @@ import java.util.Arrays;
 import java.util.Scanner;
 
 public class Levenshtein {
-    public static final String FILENAME = "src/dictionaryCatDog.txt";
+    public static final String FILENAME = "src/dictionarySortedLength.txt";
     public static final ArrayList<Word> dictionary = getWords();
     private static final Scanner console = new Scanner(System.in);
     static ArrayList<Word> words1 = null;
@@ -66,21 +66,32 @@ public class Levenshtein {
                 word2 = console.nextLine();
         }
         System.out.println("Both words are A OK");
-        System.out.println(findLocation(word1)+ " " + findLocation(word2));
+        //System.out.println(findLocation(word1)+ " " + findLocation(word2));
         ArrayList<ArrayList<Word>> paths = findDistance(findLocation(word1), findLocation(word2));
     }
     static ArrayList<ArrayList<Word>> findDistance(int word1, int word2){
         words1 = setDifference(word1);
         words2 = setDifference(word2);
-
         return null;
     }
     static ArrayList<Word> setDifference(int word2){
         Word ref = dictionary.get(word2);
         ArrayList<Word> diff = new ArrayList<>();
         for (Word w : dictionary){
+            if (dictionary.get(word2) == w)
+                continue;
             int temp = numMisMatch(ref.toString(), w.toString());
-            diff.add(new Word(w, temp));
+            Word thing = new Word(w, temp);
+            if (!diff.isEmpty()) {
+                if (thing.getDistance() < diff.get(0).getDistance())
+                    diff.add(0, thing);
+                else if (thing.getDistance() > diff.get(diff.size() - 1).getDistance())
+                    diff.add(thing);
+                else
+                    diff.add(firstIndexDistance(thing.getDistance(), 0, diff.size(), diff) + 1, thing);
+            }
+            else
+                diff.add(thing);
         }
         return diff;
     }
@@ -119,14 +130,29 @@ public class Levenshtein {
         int mid = (start + finish) / 2;
         if (mid == 0)
             return 0;
-        else if (finish - start == 1 && length != current.get(start).length())
+        else if (finish - start == 1 && length != current.get(start).length() && current.get(finish).length() != length)
             return -1;
+        else if (finish - start == 1 && length != current.get(start).length())
+            return finish;
         if ((current.get(mid).length() == current.get(mid - 1).length() + 1) && current.get(mid).length() == length) {
             return mid;
         } else if (current.get(mid).length() > length - 1) {
             return firstIndex(length, start, mid, current);
         } else
             return firstIndex(length, mid, finish, current);
+    }
+    static int firstIndexDistance(int distance, int start, int finish, ArrayList<Word> current){
+        int mid = (start + finish) / 2;
+        if (mid == 0)
+            return 0;
+        else if (finish - start == 1 && distance != current.get(start).getDistance())
+            return finish;
+        if ((current.get(mid).getDistance() == current.get(mid - 1).getDistance() + 1) && current.get(mid).getDistance() == distance) {
+            return mid;
+        } else if (current.get(mid).getDistance() > distance - 1) {
+            return firstIndexDistance(distance, start, mid, current);
+        } else
+            return firstIndexDistance(distance, mid, finish, current);
     }
     static boolean misMatch(String word1, String word2) {
         int difference = 0;
