@@ -51,6 +51,12 @@ public class Levenshtein {
             finish[i] = temp.get(i);
         return finish;
     }
+    static int[] startingDistanceIndexes(ArrayList<Word> words){
+        int[] distance = new int[words.get(words.size()-1).getDistance()];
+        for (int i = 1; i < distance.length; i++)
+            distance[i] = firstIndexDistance(i, distance[i - 1], words.size(), words);
+        return distance;
+    }
     public static void main(String[] args) {
         System.out.println(Arrays.toString(lengthStarts));
         System.out.println("Input your two words:");
