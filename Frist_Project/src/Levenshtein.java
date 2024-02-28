@@ -9,7 +9,7 @@ public class Levenshtein {
     public static final ArrayList<Word> dictionary = getWords();
     private static final Scanner console = new Scanner(System.in);
     static ArrayList<Word> words1 = null;
-    static ArrayList<Word> words2 = null;
+    static int[] word1Distances = null;
     public static ArrayList<Word> getWords() {
         ArrayList<Word> words = new ArrayList<>();
         Scanner f;
@@ -53,6 +53,7 @@ public class Levenshtein {
     }
     static int[] startingDistanceIndexes(ArrayList<Word> words){
         int[] distance = new int[words.get(words.size()-1).getDistance()];
+        distance[0] = 1;
         for (int i = 1; i < distance.length; i++)
             distance[i] = firstIndexDistance(i, distance[i - 1], words.size(), words);
         return distance;
@@ -77,7 +78,12 @@ public class Levenshtein {
     }
     static ArrayList<ArrayList<Word>> findDistance(int word1, int word2){
         words1 = setDifference(word1);
-        words2 = setDifference(word2);
+        word1Distances = startingDistanceIndexes(words1);
+
+        int w2loc = findDistanceLocation(dictionary.get(word2).toString(), words1);
+
+        ArrayList<Word> nextDistance = new ArrayList<>();
+
         return null;
     }
     static ArrayList<Word> setDifference(int word2){
@@ -99,6 +105,7 @@ public class Levenshtein {
             else
                 diff.add(thing);
         }
+        diff.add(0, ref);
         return diff;
     }
     int[] findDistanceRecurse(int word1, int word2, int currentShortest, int[] choices){
@@ -236,6 +243,13 @@ public class Levenshtein {
             if (word.equals(dictionary.get(i).toString()))
                 return i;
         }
+        return -1;
+    }
+    static int findDistanceLocation(String word, ArrayList<Word> ref){
+        int distance = numMisMatch(word, ref.get(0).toString());
+        for (int i = word1Distances[distance]; i < word1Distances[distance + 1]; i++)
+            if (word.equals(ref.get(i).toString()))
+                return i;
         return -1;
     }
 }
