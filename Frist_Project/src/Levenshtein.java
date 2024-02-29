@@ -2,6 +2,7 @@ import java.io.File;
 import java.io.FileNotFoundException;
 import java.util.ArrayList;
 import java.util.Arrays;
+import java.util.Collection;
 import java.util.Scanner;
 
 public class Levenshtein {
@@ -52,8 +53,8 @@ public class Levenshtein {
         return finish;
     }
     static int[] startingDistanceIndexes(ArrayList<Word> words){
-        int[] distance = new int[words.get(words.size()-1).getDistance()];
-        distance[0] = 1;
+        int[] distance = new int[words.get(words.size()-1).getDistance() + 1];
+        distance[0] = 0;
         for (int i = 1; i < distance.length; i++)
             distance[i] = firstIndexDistance(i, distance[i - 1], words.size(), words);
         return distance;
@@ -80,10 +81,36 @@ public class Levenshtein {
         words1 = setDifference(word1);
         word1Distances = startingDistanceIndexes(words1);
 
-        int w2loc = findDistanceLocation(dictionary.get(word2).toString(), words1);
+        Word w2 = dictionary.get(word2);
+        Word w1 = dictionary.get(word1);
+        //System.out.println(words1);
+        //System.out.println(Arrays.toString(word1Distances));
+        ArrayList<ArrayList<Word>> paths = new ArrayList<>();
+        boolean pathFound = false;
 
-        ArrayList<Word> nextDistance = new ArrayList<>();
-
+        int distance = 0;
+        ArrayList<Word> path = new ArrayList<>();
+        ArrayList<Word> realPath = new ArrayList<>();
+        path.add(w2);
+        int timesRan = 0;
+        while(!path.isEmpty()) {
+            Word current = path.remove(path.size() - 1);
+            if (current.equals(w1))
+                break;
+            distance = numMisMatch(current.toString(), w1.toString());
+            ArrayList<Word> nextDistance = new ArrayList<>(words1.subList(word1Distances[distance - 1], word1Distances[distance]));
+            //System.out.println(nextDistance);
+            ArrayList<Word> neighbors = findNeighbors(current.toString());
+            //System.out.println(neighbors);
+            neighbors.retainAll(nextDistance);
+            //System.out.println(neighbors);
+            if (!neighbors.isEmpty()) {
+                path.addAll(neighbors);
+                realPath.add(current);
+            }
+        }
+        realPath.add(w1);
+        System.out.println(realPath);
         return null;
     }
     static ArrayList<Word> setDifference(int word2){
@@ -168,9 +195,11 @@ public class Levenshtein {
             return firstIndexDistance(distance, mid, finish, current);
     }
     static boolean misMatch(String word1, String word2) {
+        return misMatch(word1.getBytes(), word2.getBytes());
+    }
+    static boolean misMatch(byte[] w1, byte[] w2) {
         int difference = 0;
-        byte[] w1 = word1.getBytes(), w2 = word2.getBytes();
-        if (word1.length() == word2.length()) {
+        if (w1.length == w2.length) {
             for (int i = 0; i < w1.length; i++) {
                 if (w1[i] != w2[i]) {
                     difference++;
@@ -181,7 +210,7 @@ public class Levenshtein {
         }
         else
         {
-            if (word2.length() > word1.length()) {
+            if (w2.length > w1.length) {
                 byte[] temp = w1;
                 w1 = w2;
                 w2 = temp;
@@ -252,6 +281,21 @@ public class Levenshtein {
                 return i;
         return -1;
     }
+    static ArrayList<Word> findNeighbors(String w){
+        ArrayList<Word> value = new ArrayList<>();
+        byte[] b = w.getBytes();
+        int temp = w.length();
+        if (temp > 1)
+            temp -= 2;
+        int max = w.length();
+        if (w.length() < lengthStarts.length - 2)
+            max++;
+        for (int i = lengthStarts[temp]; i < lengthStarts[max]; i++){
+            if (misMatch(b, dictionary.get(i).toString().getBytes()))
+                value.add(dictionary.get(i));
+        }
+        return value;
+    }
 }
 class Word{
     private final String word;
@@ -276,4 +320,5 @@ class Word{
     int getLocation() {return location;}
     int getDistance() {return distance;}
     public String toString() {return word;}
+    public boolean equals(Object o) {return o.toString().equals(word);}
 }
