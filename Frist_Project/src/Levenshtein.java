@@ -1,9 +1,6 @@
 import java.io.File;
 import java.io.FileNotFoundException;
-import java.util.ArrayList;
-import java.util.Arrays;
-import java.util.Collection;
-import java.util.Scanner;
+import java.util.*;
 
 public class Levenshtein {
     public static final String FILENAME = "src/dictionarySortedLength.txt";
@@ -85,7 +82,10 @@ public class Levenshtein {
         Word w1 = dictionary.get(word1);
         //System.out.println(words1);
         //System.out.println(Arrays.toString(word1Distances));
-        ArrayList<ArrayList<Word>> paths = new ArrayList<>();
+        ArrayList<HashSet<Word>> paths = new ArrayList<>();
+        for (int i = 0; i < word1Distances.length; i++) {
+            paths.add(new HashSet<>());
+        }
         boolean pathFound = false;
 
         int distance = 0;
@@ -93,11 +93,13 @@ public class Levenshtein {
         ArrayList<Word> realPath = new ArrayList<>();
         path.add(w2);
         int timesRan = 0;
+        paths.get(0).add(w1);
         while(!path.isEmpty()) {
             Word current = path.remove(path.size() - 1);
-            if (current.equals(w1))
-                break;
+            System.out.println(current);
+            //if (numMisMatch(current.toString(), w1.toString()) == 1) {
             distance = numMisMatch(current.toString(), w1.toString());
+            paths.get(distance).add(current);
             ArrayList<Word> nextDistance = new ArrayList<>(words1.subList(word1Distances[distance - 1], word1Distances[distance]));
             //System.out.println(nextDistance);
             ArrayList<Word> neighbors = findNeighbors(current.toString());
@@ -106,11 +108,10 @@ public class Levenshtein {
             //System.out.println(neighbors);
             if (!neighbors.isEmpty()) {
                 path.addAll(neighbors);
-                realPath.add(current);
             }
         }
-        realPath.add(w1);
-        System.out.println(realPath);
+        paths.trimToSize();
+        System.out.println(paths);
         return null;
     }
     static ArrayList<Word> setDifference(int word2){
@@ -185,8 +186,10 @@ public class Levenshtein {
         int mid = (start + finish) / 2;
         if (mid == 0)
             return 0;
+        else if (finish - start == 1 && distance != current.get(start).getDistance() && current.get(finish).getDistance() != distance)
+            return -1;
         else if (finish - start == 1 && distance != current.get(start).getDistance())
-            return finish;
+            return distance;
         if ((current.get(mid).getDistance() == current.get(mid - 1).getDistance() + 1) && current.get(mid).getDistance() == distance) {
             return mid;
         } else if (current.get(mid).getDistance() > distance - 1) {
