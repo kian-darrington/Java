@@ -1,9 +1,10 @@
 import java.io.File;
 import java.io.FileNotFoundException;
+import java.io.PrintStream;
 import java.util.*;
 
 public class Levenshtein {
-    public static final String FILENAME = "src/dictionarySortedLength.txt";
+    public static final String FILENAME = "src/dictionaryCatDog.txt";
     public static final ArrayList<Word> dictionary = getWords();
     private static final Scanner console = new Scanner(System.in);
     static ArrayList<Word> words1 = null;
@@ -18,10 +19,16 @@ public class Levenshtein {
         }
         int i = 0;
         while (f.hasNext()) {
-            words.add(new Word(f.next().toLowerCase(), i));
+            words.add(new Word(f.next().toLowerCase()));
             i++;
         }
         return words;
+    }
+    static void saveData(ArrayList<Word> words) throws FileNotFoundException{
+        PrintStream output = new PrintStream("src/SaveData");
+        for (int i = 0; i < words.size(); i++){
+            output.println(words.get(i).getDistance() + " " + words.get(i).toString());
+        }
     }
     public static ArrayList<String> getWordsStrings() {
         ArrayList<String> words = new ArrayList<>();
@@ -78,7 +85,9 @@ public class Levenshtein {
         words1 = setDifference(word1);
         word1Distances = startingDistanceIndexes(words1);
 
-        Word w2 = dictionary.get(word2);
+        ArrayList<Word> sorted = enhanceDifference(words1, word1Distances);
+
+        /*Word w2 = dictionary.get(word2);
         Word w1 = dictionary.get(word1);
         //System.out.println(words1);
         //System.out.println(Arrays.toString(word1Distances));
@@ -111,7 +120,7 @@ public class Levenshtein {
             }
         }
         paths.trimToSize();
-        System.out.println(paths);
+        System.out.println(paths);*/
         return null;
     }
     static ArrayList<Word> setDifference(int word2){
@@ -135,6 +144,36 @@ public class Levenshtein {
         }
         diff.add(0, ref);
         return diff;
+    }
+    static ArrayList<Word> enhanceDifference(ArrayList words, int[] locations){
+        ArrayList<Word> sorted = new ArrayList<>(words.subList(0, locations[2]));
+        ArrayList<Word> extra = new ArrayList<>();
+        ArrayList<Integer> distanceStarts= new ArrayList<>();
+        distanceStarts.add(0);
+        distanceStarts.add(locations[1]);
+        for (int i = 2; i < locations.length; i++){
+            if (locations[i] < 0)
+                break;
+            distanceStarts.add(sorted.size() - 1);
+            extra.addAll(words.subList(locations[i - 1], locations[i]));
+                for (int j = distanceStarts.get(i - 1); j < distanceStarts.get(i); j++) {
+                    for (int o = 0; o < extra.size(); o++) {
+                        if (misMatch(extra.get(o).toString(), sorted.get(j).toString())) {
+                            sorted.add(new Word(extra.remove(o), i));
+                            sorted.get(sorted.size() - 1).setDistance(i);
+                            break;
+                        }
+                    }
+                }
+        }
+        for (int i = 0; i < extra.size(); i++)
+            System.out.println(extra.get(i).printStuff());
+        try {
+            saveData(sorted);
+        } catch (FileNotFoundException e) {
+            throw new RuntimeException(e);
+        }
+        return sorted;
     }
     int[] findDistanceRecurse(int word1, int word2, int currentShortest, int[] choices){
         int[] previousChoices = new int[1];
@@ -302,26 +341,23 @@ public class Levenshtein {
 }
 class Word{
     private final String word;
-    private final int location;
     private int distance = 0;
-    Word(String w, int l){
-        word = w;
-        location = l;
-    }
     Word (Word w){
         word = w.word;
-        location = w.location;
         distance = w.distance;
     }
     Word (Word w, int d){
         word = w.word;
-        location = w.location;
         distance = d;
+    }
+    Word (String s){
+        word = s;
     }
     void setDistance(int i) {distance = i;}
     int length() {return word.length();}
-    int getLocation() {return location;}
     int getDistance() {return distance;}
     public String toString() {return word;}
     public boolean equals(Object o) {return o.toString().equals(word);}
+    public Word clone() {return new Word(this);}
+    public String printStuff() {return distance +" " +word;}
 }
