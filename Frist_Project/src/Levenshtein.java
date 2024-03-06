@@ -56,13 +56,6 @@ public class Levenshtein {
             finish[i] = temp.get(i);
         return finish;
     }
-    static int[] startingDistanceIndexes(ArrayList<Word> words){
-        int[] distance = new int[words.get(words.size()-1).getDistance() + 1];
-        distance[0] = 0;
-        for (int i = 1; i < distance.length; i++)
-            distance[i] = firstIndexDistance(i, distance[i - 1], words.size(), words);
-        return distance;
-    }
     public static void main(String[] args) {
         System.out.println(Arrays.toString(lengthStarts));
         System.out.println("Input your two words:");
@@ -79,131 +72,15 @@ public class Levenshtein {
         }
         System.out.println("Both words are A OK");
         //System.out.println(findLocation(word1)+ " " + findLocation(word2));
-        ArrayList<ArrayList<Word>> paths = findDistance(findLocation(word1), findLocation(word2));
+        Word w = dictionary.get(findLocation(word1)), j = dictionary.get(findLocation(word2));
+        ArrayList<ArrayList<Word>> paths = findDistance(w, j);
     }
-    static ArrayList<ArrayList<Word>> findDistance(int word1, int word2){
-        words1 = setDifference(word1);
-        word1Distances = startingDistanceIndexes(words1);
-
-        ArrayList<Word> sorted = enhanceDifference(words1, word1Distances);
-
-        /*Word w2 = dictionary.get(word2);
-        Word w1 = dictionary.get(word1);
-        //System.out.println(words1);
-        //System.out.println(Arrays.toString(word1Distances));
-        ArrayList<HashSet<Word>> paths = new ArrayList<>();
-        for (int i = 0; i < word1Distances.length; i++) {
-            paths.add(new HashSet<>());
-        }
-        boolean pathFound = false;
-
-        int distance = 0;
-        ArrayList<Word> path = new ArrayList<>();
-        ArrayList<Word> realPath = new ArrayList<>();
-        path.add(w2);
-        int timesRan = 0;
-        paths.get(0).add(w1);
-        while(!path.isEmpty()) {
-            Word current = path.remove(path.size() - 1);
-            System.out.println(current);
-            //if (numMisMatch(current.toString(), w1.toString()) == 1) {
-            distance = numMisMatch(current.toString(), w1.toString());
-            paths.get(distance).add(current);
-            ArrayList<Word> nextDistance = new ArrayList<>(words1.subList(word1Distances[distance - 1], word1Distances[distance]));
-            //System.out.println(nextDistance);
-            ArrayList<Word> neighbors = findNeighbors(current.toString());
-            //System.out.println(neighbors);
-            neighbors.retainAll(nextDistance);
-            //System.out.println(neighbors);
-            if (!neighbors.isEmpty()) {
-                path.addAll(neighbors);
-            }
-        }
-        paths.trimToSize();
-        System.out.println(paths);*/
-        return null;
-    }
-    static ArrayList<Word> setDifference(int word2){
-        Word ref = dictionary.get(word2);
-        ArrayList<Word> diff = new ArrayList<>();
-        for (Word w : dictionary){
-            if (dictionary.get(word2) == w)
-                continue;
-            int temp = numMisMatch(ref.toString(), w.toString());
-            Word thing = new Word(w, temp);
-            if (!diff.isEmpty()) {
-                if (thing.getDistance() < diff.get(0).getDistance())
-                    diff.add(0, thing);
-                else if (thing.getDistance() > diff.get(diff.size() - 1).getDistance())
-                    diff.add(thing);
-                else
-                    diff.add(firstIndexDistance(thing.getDistance(), 0, diff.size(), diff) + 1, thing);
-            }
-            else
-                diff.add(thing);
-        }
-        diff.add(0, ref);
-        return diff;
-    }
-    static ArrayList<Word> enhanceDifference(ArrayList words, int[] locations){
-        ArrayList<Word> sorted = new ArrayList<>(words.subList(0, locations[2]));
-        ArrayList<Word> extra = new ArrayList<>();
-        ArrayList<Integer> distanceStarts= new ArrayList<>();
-        distanceStarts.add(0);
-        distanceStarts.add(locations[1]);
-        for (int i = 2; i < locations.length; i++){
-            if (locations[i] < 0)
-                break;
-            distanceStarts.add(sorted.size() - 1);
-            extra.addAll(words.subList(locations[i - 1], locations[i]));
-                for (int j = distanceStarts.get(i - 1); j < distanceStarts.get(i); j++) {
-                    for (int o = 0; o < extra.size(); o++) {
-                        if (misMatch(extra.get(o).toString(), sorted.get(j).toString())) {
-                            sorted.add(new Word(extra.remove(o), i));
-                            sorted.get(sorted.size() - 1).setDistance(i);
-                            break;
-                        }
-                    }
-                }
-        }
-        for (int i = 0; i < extra.size(); i++)
-            System.out.println(extra.get(i).printStuff());
-        try {
-            saveData(sorted);
-        } catch (FileNotFoundException e) {
-            throw new RuntimeException(e);
-        }
-        return sorted;
-    }
-    int[] findDistanceRecurse(int word1, int word2, int currentShortest, int[] choices){
-        int[] previousChoices = new int[1];
-        if (choices != null) {
-            previousChoices = new int[choices.length + 1];
-            for (int i = 0; i < choices.length; i++)
-                previousChoices[i] = choices[i];
-            previousChoices[previousChoices.length - 1] = word1;
-        } else
-            previousChoices[0] = word1;
-        ArrayList<Integer> possible = new ArrayList<>();
-        for (int i = lengthStarts[word1 - 2]; i < lengthStarts[word1]; i++)
-            if (misMatch(dictionary.get(word1).toString(), dictionary.get(i).toString()))
-                possible.add(i);
-        if (possible.contains(word2))
-            return previousChoices;
-        else{
-            for (int i : previousChoices)
-                possible.remove((Integer) i);
-        }
-        if (possible.isEmpty())
-            return null;
-        else{
-            for (int i : possible) {
-                int[] temp = findDistanceRecurse(i, word2, currentShortest, previousChoices);
-                if (temp != null)
-                    return temp;
-            }
-
-        }
+    static ArrayList<ArrayList<Word>> findDistance(Word word1, Word word2){
+        ArrayList<ArrayList<Word>> tree = new ArrayList<>();
+        tree.add(new ArrayList<Word>());
+        tree.get(0).add(word1);
+        HashSet<Word> seen = new HashSet<>(tree.get(0));
+        
         return null;
     }
     static int firstIndex(int length, int start, int finish, ArrayList<Word> current){
@@ -220,21 +97,6 @@ public class Levenshtein {
             return firstIndex(length, start, mid, current);
         } else
             return firstIndex(length, mid, finish, current);
-    }
-    static int firstIndexDistance(int distance, int start, int finish, ArrayList<Word> current){
-        int mid = (start + finish) / 2;
-        if (mid == 0)
-            return 0;
-        else if (finish - start == 1 && distance != current.get(start).getDistance() && current.get(finish).getDistance() != distance)
-            return -1;
-        else if (finish - start == 1 && distance != current.get(start).getDistance())
-            return distance;
-        if ((current.get(mid).getDistance() == current.get(mid - 1).getDistance() + 1) && current.get(mid).getDistance() == distance) {
-            return mid;
-        } else if (current.get(mid).getDistance() > distance - 1) {
-            return firstIndexDistance(distance, start, mid, current);
-        } else
-            return firstIndexDistance(distance, mid, finish, current);
     }
     static boolean misMatch(String word1, String word2) {
         return misMatch(word1.getBytes(), word2.getBytes());
@@ -276,38 +138,6 @@ public class Levenshtein {
         }
         return difference != 0;
     }
-    static int numMisMatch(String word1, String word2){
-        int difference = 0;
-        byte[] w1 = word1.getBytes(), w2 = word2.getBytes();
-        if (word1.length() == word2.length()) {
-            for (int i = 0; i < w1.length; i++) {
-                if (w1[i] != w2[i]) {
-                    difference++;
-                }
-            }
-        }
-        else
-        {
-            if (word2.length() > word1.length()) {
-                byte[] temp = w1;
-                w1 = w2;
-                w2 = temp;
-            }
-            int count = 0;
-            for (int i = 0; i < w1.length; i++) {
-                if (count < w2.length) {
-                    if (w1[i] != w2[count]) {
-                        difference++;
-                    } else
-                        count++;
-                }
-                else {
-                    difference++;
-                }
-            }
-        }
-        return difference;
-    }
     static int findLocation(String word){
         int start = lengthStarts[word.length() - 1], end = lengthStarts[word.length()];
         for (int i = start; i < end; i++){
@@ -316,16 +146,9 @@ public class Levenshtein {
         }
         return -1;
     }
-    static int findDistanceLocation(String word, ArrayList<Word> ref){
-        int distance = numMisMatch(word, ref.get(0).toString());
-        for (int i = word1Distances[distance]; i < word1Distances[distance + 1]; i++)
-            if (word.equals(ref.get(i).toString()))
-                return i;
-        return -1;
-    }
-    static ArrayList<Word> findNeighbors(String w){
+    static ArrayList<Word> findNeighbors(Word w){
         ArrayList<Word> value = new ArrayList<>();
-        byte[] b = w.getBytes();
+        byte[] b = w.toString().getBytes();
         int temp = w.length();
         if (temp > 1)
             temp -= 2;
@@ -334,17 +157,24 @@ public class Levenshtein {
             max++;
         for (int i = lengthStarts[temp]; i < lengthStarts[max]; i++){
             if (misMatch(b, dictionary.get(i).toString().getBytes()))
-                value.add(dictionary.get(i));
+                value.add(new Word (dictionary.get(i), w));
         }
         return value;
     }
 }
 class Word{
+    private Word parent = null;
     private final String word;
     private int distance = 0;
     Word (Word w){
         word = w.word;
         distance = w.distance;
+        parent = null;
+    }
+    Word (Word w, Word p){
+        word = w.word;
+        distance = w.distance;
+        parent = p;
     }
     Word (Word w, int d){
         word = w.word;
@@ -353,6 +183,7 @@ class Word{
     Word (String s){
         word = s;
     }
+    void setParent(Word w) {parent = w;}
     void setDistance(int i) {distance = i;}
     int length() {return word.length();}
     int getDistance() {return distance;}
@@ -360,4 +191,5 @@ class Word{
     public boolean equals(Object o) {return o.toString().equals(word);}
     public Word clone() {return new Word(this);}
     public String printStuff() {return distance +" " +word;}
+    public Word getParent() {return parent;}
 }
