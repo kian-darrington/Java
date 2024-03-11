@@ -27,7 +27,7 @@ public class Levenshtein {
     static void saveData(ArrayList<Word> words) throws FileNotFoundException{
         PrintStream output = new PrintStream("src/SaveData");
         for (int i = 0; i < words.size(); i++){
-            output.println(words.get(i).getDistance() + " " + words.get(i).toString());
+            output.println(words.get(i).toString());
         }
     }
     public static ArrayList<String> getWordsStrings() {
@@ -79,8 +79,29 @@ public class Levenshtein {
         ArrayList<ArrayList<Word>> tree = new ArrayList<>();
         tree.add(new ArrayList<Word>());
         tree.get(0).add(word1);
+        if (word1.equals(word2))
+            return tree;
         HashSet<Word> seen = new HashSet<>(tree.get(0));
-        
+
+        tree.add(new ArrayList<Word>());
+
+        int level = 0;
+        int found = 0;
+
+        for(Word word : tree.get(level)){
+            if (!seen.contains(word)) {
+                HashSet<Word> choices = findNeighbors(word);
+                for (Word temp : choices) {
+                    if (temp.equals(word1))
+                        found++;
+                    if (misMatch(word, temp))
+                        tree.get(level + 1).add(temp);
+                }
+                seen.add(word);
+            }
+
+        }
+
         return null;
     }
     static int firstIndex(int length, int start, int finish, ArrayList<Word> current){
@@ -138,6 +159,7 @@ public class Levenshtein {
         }
         return difference != 0;
     }
+    static boolean misMatch (Word w1, Word w2) { return misMatch(w1.toString().getBytes(), w2.toString().getBytes());}
     static int findLocation(String word){
         int start = lengthStarts[word.length() - 1], end = lengthStarts[word.length()];
         for (int i = start; i < end; i++){
@@ -146,9 +168,8 @@ public class Levenshtein {
         }
         return -1;
     }
-    static ArrayList<Word> findNeighbors(Word w){
-        ArrayList<Word> value = new ArrayList<>();
-        byte[] b = w.toString().getBytes();
+    static HashSet<Word> findNeighbors(Word w){
+        HashSet<Word> value = new HashSet<>();
         int temp = w.length();
         if (temp > 1)
             temp -= 2;
@@ -156,7 +177,7 @@ public class Levenshtein {
         if (w.length() < lengthStarts.length - 2)
             max++;
         for (int i = lengthStarts[temp]; i < lengthStarts[max]; i++){
-            if (misMatch(b, dictionary.get(i).toString().getBytes()))
+            if (misMatch(w, dictionary.get(i)))
                 value.add(new Word (dictionary.get(i), w));
         }
         return value;
@@ -165,31 +186,20 @@ public class Levenshtein {
 class Word{
     private Word parent = null;
     private final String word;
-    private int distance = 0;
     Word (Word w){
         word = w.word;
-        distance = w.distance;
-        parent = null;
     }
     Word (Word w, Word p){
         word = w.word;
-        distance = w.distance;
         parent = p;
-    }
-    Word (Word w, int d){
-        word = w.word;
-        distance = d;
     }
     Word (String s){
         word = s;
     }
     void setParent(Word w) {parent = w;}
-    void setDistance(int i) {distance = i;}
     int length() {return word.length();}
-    int getDistance() {return distance;}
     public String toString() {return word;}
     public boolean equals(Object o) {return o.toString().equals(word);}
-    public Word clone() {return new Word(this);}
-    public String printStuff() {return distance +" " +word;}
+    public Word clone() {return new Word(this, parent);}
     public Word getParent() {return parent;}
 }
