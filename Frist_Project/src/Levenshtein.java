@@ -1,14 +1,10 @@
-import java.io.File;
-import java.io.FileNotFoundException;
-import java.io.PrintStream;
+import java.io.*;
 import java.util.*;
 
 public class Levenshtein {
-    public static final String FILENAME = "src/dictionaryCatDog.txt";
+    public static final String FILENAME = "Frist_Project/src/dictionarySortedLength.txt";
     public static final ArrayList<Word> dictionary = getWords();
     private static final Scanner console = new Scanner(System.in);
-    static ArrayList<Word> words1 = null;
-    static int[] word1Distances = null;
     public static ArrayList<Word> getWords() {
         ArrayList<Word> words = new ArrayList<>();
         Scanner f;
@@ -23,12 +19,6 @@ public class Levenshtein {
             i++;
         }
         return words;
-    }
-    static void saveData(ArrayList<Word> words) throws FileNotFoundException{
-        PrintStream output = new PrintStream("src/SaveData");
-        for (int i = 0; i < words.size(); i++){
-            output.println(words.get(i).toString());
-        }
     }
     public static ArrayList<String> getWordsStrings() {
         ArrayList<String> words = new ArrayList<>();
@@ -57,23 +47,35 @@ public class Levenshtein {
         return finish;
     }
     public static void main(String[] args) {
-        System.out.println(Arrays.toString(lengthStarts));
         System.out.println("Input your two words:");
         String word1 = console.nextLine();
         String word2 = console.nextLine();
         ArrayList<String> temp = getWordsStrings();
+
         while (!temp.contains(word1) || !temp.contains(word2)){
             System.out.println("One or both of your words is not found in dictionary");
             System.out.println("Input another word");
             if (!temp.contains(word1))
                 word1 = console.nextLine();
-            else if (temp.contains(word2))
+            else if (!temp.contains(word2))
                 word2 = console.nextLine();
         }
+
         System.out.println("Both words are A OK");
         //System.out.println(findLocation(word1)+ " " + findLocation(word2));
         Word w = dictionary.get(findLocation(word1)), j = dictionary.get(findLocation(word2));
+
         ArrayList<ArrayList<Word>> paths = findDistance(w, j);
+        for (Word word : paths.get(paths.size() - 1)){
+            if (word.equals(j)){
+                Word ans = word;
+                while (ans.getParent() != null){
+                    System.out.print(ans + ", ");
+                    ans = ans.getParent();
+                }
+                System.out.println(w);
+            }
+        }
     }
     static ArrayList<ArrayList<Word>> findDistance(Word word1, Word word2){
         ArrayList<ArrayList<Word>> tree = new ArrayList<>();
@@ -81,28 +83,40 @@ public class Levenshtein {
         tree.get(0).add(word1);
         if (word1.equals(word2))
             return tree;
-        HashSet<Word> seen = new HashSet<>(tree.get(0));
-
-        tree.add(new ArrayList<Word>());
+        HashSet<Word> seen = new HashSet<>();
 
         int level = 0;
-        int found = 0;
+        boolean found = false;
 
-        for(Word word : tree.get(level)){
-            if (!seen.contains(word)) {
-                HashSet<Word> choices = findNeighbors(word);
-                for (Word temp : choices) {
-                    if (temp.equals(word1))
-                        found++;
-                    if (misMatch(word, temp))
-                        tree.get(level + 1).add(temp);
+        while (!found && !tree.get(level).isEmpty()) {
+            System.out.println("New level added with size of " + tree.get(level).size());
+            tree.add(new ArrayList<Word>());
+            for (Word word : tree.get(level)) {
+                if (!seen.contains(word)) {
+                    if (!found) {
+                        HashSet<Word> choices = findNeighbors(word);
+                        choices.removeAll(seen);
+                        for (Word temp : choices) {
+                            if (misMatch(word, temp)) {
+                                tree.get(level + 1).add(new Word(temp, word));
+                                if (temp.equals(word2)) {
+                                    found = true;
+                                    System.out.println("Found a path!");
+                                }
+                            }
+                        }
+                    }
+                    else if (misMatch(word, word2))
+                        tree.get(level + 1).add(new Word (word2, word));
+                    seen.add(word);
                 }
-                seen.add(word);
             }
-
+            level++;
         }
 
-        return null;
+        if (!found)
+            System.out.println("Wow... That was a waste of time");
+        return tree;
     }
     static int firstIndex(int length, int start, int finish, ArrayList<Word> current){
         int mid = (start + finish) / 2;
@@ -119,17 +133,12 @@ public class Levenshtein {
         } else
             return firstIndex(length, mid, finish, current);
     }
-    static boolean misMatch(String word1, String word2) {
-        return misMatch(word1.getBytes(), word2.getBytes());
-    }
     static boolean misMatch(byte[] w1, byte[] w2) {
         int difference = 0;
         if (w1.length == w2.length) {
             for (int i = 0; i < w1.length; i++) {
                 if (w1[i] != w2[i]) {
                     difference++;
-                    if (difference > 1)
-                        return false;
                 }
             }
         }
@@ -145,19 +154,15 @@ public class Levenshtein {
                 if (count < w2.length) {
                     if (w1[i] != w2[count]) {
                         difference++;
-                        if (difference > 1)
-                            return false;
                     } else
                         count++;
                 }
                 else {
                     difference++;
-                    if (difference > 1)
-                        return false;
                 }
             }
         }
-        return difference != 0;
+        return difference < 2;
     }
     static boolean misMatch (Word w1, Word w2) { return misMatch(w1.toString().getBytes(), w2.toString().getBytes());}
     static int findLocation(String word){
@@ -176,11 +181,7 @@ public class Levenshtein {
         int max = w.length();
         if (w.length() < lengthStarts.length - 2)
             max++;
-        for (int i = lengthStarts[temp]; i < lengthStarts[max]; i++){
-            if (misMatch(w, dictionary.get(i)))
-                value.add(new Word (dictionary.get(i), w));
-        }
-        return value;
+        return new HashSet<>(dictionary.subList(lengthStarts[temp], lengthStarts[max]));
     }
 }
 class Word{
@@ -200,6 +201,5 @@ class Word{
     int length() {return word.length();}
     public String toString() {return word;}
     public boolean equals(Object o) {return o.toString().equals(word);}
-    public Word clone() {return new Word(this, parent);}
     public Word getParent() {return parent;}
 }
