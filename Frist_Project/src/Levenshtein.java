@@ -97,12 +97,14 @@ public class Levenshtein {
                     if (!found) {
                         HashSet<Word> choices = findNeighbors(word);
                         choices.removeAll(seen);
-                        choices.removeIf(t -> !misMatch(t, word));
-                        tree.get(level + 1).addAll(choices);
                         if (choices.contains(word2)) {
                             found = true;
                             System.out.println("Found a path!");
                         }
+                        ArrayList<Word> holder = tree.get(level + 1);
+                        for (Word temp : choices)
+                            if (misMatch(temp, word))
+                                holder.add(new Word(temp, word));
                     }
                     else if (misMatch(word, word2))
                         tree.get(level + 1).add(new Word (word2, word));
@@ -176,14 +178,13 @@ public class Levenshtein {
     }
     static HashSet<Word> findNeighbors(Word w){
         int temp = w.length();
+        int max = temp;
         if (temp > 1)
             temp -= 2;
-        int max = w.length();
-        if (w.length() < lengthStarts.length - 2)
+        if (max < lengthStarts.length - 2)
             max++;
         HashSet<Word> value = new HashSet<>(dictionary.subList(lengthStarts[temp], lengthStarts[max]));
         value.removeIf(t -> !misMatch(w, t));
-        value.forEach(t -> t.setParent(w));
         return value;
     }
 }
