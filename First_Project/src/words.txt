@@ -1,4 +1,4 @@
-Bake	Word	List
+Bake	Levenshtein_Project.Word	List
 Four	Five	Nine
 Good	Best	Cute
 Zero	Huge	Cool
