@@ -39,6 +39,6 @@ public class JavaTest {
     }
     public static void main(String[] args) {
         Scanner console = new Scanner(System.in);
-        System.out.println(MazeMaker.block);
+        System.out.println((char) 0x2588);
     }
 }

@@ -1,3 +1,4 @@
+package Maze;
 import java.util.ArrayList;
 import java.util.Random;
 

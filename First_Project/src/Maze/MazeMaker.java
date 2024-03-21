@@ -1,3 +1,4 @@
+package Maze;
 import java.awt.*;
 import java.util.*;
 //This class makes a maze and can print it too

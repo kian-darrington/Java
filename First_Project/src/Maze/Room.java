@@ -1,3 +1,4 @@
+package Maze;
 import java.util.*;
 //This is the Room class which populates the maze
 public class Room {
