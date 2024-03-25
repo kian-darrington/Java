@@ -65,27 +65,37 @@ public class Training {
             throw new RuntimeException(e);
         }
     }
-    void shuffleData(){
-        ArrayList<Integer> nums = new ArrayList<>();
+    static void shuffleData(){
+        ArrayList<Integer> nums = new ArrayList<>(), ran = new ArrayList<>();
         for (int i = 0; i < num; i++)
             nums.add(i);
+        while (!nums.isEmpty())
+            ran.add(nums.remove(rand.nextInt(nums.size())));
+        byte[] tempLabel = new byte[num];
+        int [][] tempNums = new int[num][pixelCount];
+        for (int i = 0; i < num; i++){
+            tempLabel[i] = labels[ran.get(i)];
+            tempNums[i] = allInfo[ran.get(i)];
+        }
+        labels = tempLabel;
+        allInfo = tempNums;
     }
     public static void main (String[] args){
         getData();
-        String cont = "";
-        int n = 0;
-        while (n < allInfo.length) {
-            for (int i = 0; i < pixelCount; i++) {
-                if (allInfo[n][i] != 0)
-                    System.out.print((char) 0x2588);
-                else
-                    System.out.print(' ');
-                if ((i + 1) % row == 0)
-                    System.out.println();
-            }
-            System.out.print(labels[n]);
-            n++;
-            cont = console.nextLine();
+        shuffleData();
+    }
+    static void outputNum(int n){
+        for (int i = 0; i < pixelCount; i++) {
+            if (allInfo[n][i] != 0)
+                System.out.print((char) 0x2588);
+            else
+                System.out.print(' ');
+            if ((i + 1) % row == 0)
+                System.out.println();
         }
+        System.out.println(labels[n]);
+    }
+    static double sigmoid(double x){
+        return (1 / (1 + Math.exp(-x)));
     }
 }
