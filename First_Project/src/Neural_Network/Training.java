@@ -5,16 +5,19 @@ import java.math.BigInteger;
 import java.util.*;
 
 public class Training {
+    static final String BACKBONE = "src/Neural_Network/", TRAIN_IMAGES = "train-images", TRAIN_LABELS = "train-labels";
+    static final String TEST_IMAGES = "t10k-images", TEST_LABELS = "t10k-labels";
     static Scanner console = new Scanner(System.in);
     static int row = 0, num = 0, column, pixelCount = 0;
     static int[][] allInfo;
     static final Random rand = new Random();
     static byte[] labels;
-
+    static int[] networkFormat;
+    public static final int SECOND_LAYER_COUNT = 32;
     public static void getData(){
         InputStream f;
         try {
-            f = new FileInputStream(new File("src/Neural_Network/train-images"));
+            f = new FileInputStream(new File(BACKBONE + TRAIN_IMAGES));
         } catch (FileNotFoundException e) {
             throw new RuntimeException(e);
         }
@@ -46,7 +49,7 @@ public class Training {
             throw new RuntimeException(e);
         }
         try {
-            f = new FileInputStream(new File("src/Neural_Network/train-labels"));
+            f = new FileInputStream(new File(BACKBONE + TRAIN_LABELS));
         } catch (FileNotFoundException e) {
             throw new RuntimeException(e);
         }
@@ -64,6 +67,7 @@ public class Training {
         } catch (IOException e) {
             throw new RuntimeException(e);
         }
+        networkFormat = new int[] {pixelCount, SECOND_LAYER_COUNT, 10};
     }
     static void shuffleData(){
         ArrayList<Integer> nums = new ArrayList<>(), ran = new ArrayList<>();
@@ -93,7 +97,7 @@ public class Training {
             if ((i + 1) % row == 0)
                 System.out.println();
         }
-        System.out.println(labels[n]);
+        System.out.println("Correct Answer: " +labels[n]);
     }
     static double sigmoid(double x){
         return (1 / (1 + Math.exp(-x)));
