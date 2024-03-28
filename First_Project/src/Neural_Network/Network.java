@@ -10,14 +10,11 @@ public class Network {
     Network(int layerCount, int[] layerNums){
         nodes = new Node[layerCount][];
 
-        for (int i = 0; i < layerCount; i++){
+        for (int i = 1; i < layerCount; i++){
             nodes[i] = new Node[layerNums[i]];
             for (int j = 0; j < nodes[i].length; j++){
                 nodes[i][j].setBias((rand.nextDouble() - .5) * BIAS_RANGE);
-                if (i > 0)
-                    nodes[i][j].setWeights(randWeights(layerNums[i - 1]));
-                else
-                    nodes[i][j].setWeights(randWeights(1));
+                nodes[i][j].setWeights(randWeights(layerNums[i - 1]));
             }
         }
     }
@@ -52,4 +49,36 @@ public class Network {
 
         return next;
     }
+    static void backPropagate(int[][] miniBatch){
+        for (int[] picture : miniBatch) {
+            double[][][] outputs = new double[3][nodes.length][];
+            double[][] input = new double[picture.length][1];
+            for (double[][] d : outputs){
+                for (int i = 0; i< d.length; i++)
+                    d[i] = new double[nodes[i].length];
+            }
+            for (int i = 0; i < picture.length; i++) {
+                input[i][0] = (double) picture[i] / 255;
+            }
+            // Next receives the output of the entire first layer
+            double[] next = new double[picture.length];
+            for (int i = 0; i < picture.length; i++) {
+                outputs[0][0][i] = nodes[0][i].rawOutput(input[i]);
+                outputs[1][0][i] = sigmoid(outputs[0][0][i]);
+                outputs[2][0][i] = sigmoidPrime(outputs[0][0][i]);
+            }
+            // Next continues feeding forward through the network until the last layer is reached
+            for (int i = 1; i < nodes.length; i++) {
+                int size = nodes[i].length;
+                for (int j = 0; j < size; j++) {
+                    outputs[0][i][j] = nodes[0][i].rawOutput(input[i]);
+                    outputs[1][i][j] = sigmoid(outputs[0][0][i]);
+                    outputs[2][i][j] = sigmoidPrime(outputs[0][0][i]);
+                }
+            }
+
+        }
+    }
+    static double sigmoid(double x){ return (1 / (1 + Math.exp(-x)));}
+    static double sigmoidPrime(double x) { return sigmoid(x)*(1-sigmoid(x)); }
 }
