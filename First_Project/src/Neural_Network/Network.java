@@ -49,9 +49,9 @@ public class Network {
 
         return next;
     }
-    static void backPropagate(int[][] miniBatch){
+    static void backPropagate(int[][] miniBatch, double[] answer){
         for (int[] picture : miniBatch) {
-            double[][][] outputs = new double[3][nodes.length][];
+            double[][][] outputs = new double[3][nodes.length][]; // 0 is raw data, 1 is sigmoid data, 2 is sigPrime
             double[][] input = new double[picture.length][1];
             for (double[][] d : outputs){
                 for (int i = 0; i< d.length; i++)
@@ -71,11 +71,14 @@ public class Network {
             for (int i = 1; i < nodes.length; i++) {
                 int size = nodes[i].length;
                 for (int j = 0; j < size; j++) {
-                    outputs[0][i][j] = nodes[0][i].rawOutput(input[i]);
-                    outputs[1][i][j] = sigmoid(outputs[0][0][i]);
-                    outputs[2][i][j] = sigmoidPrime(outputs[0][0][i]);
+                    outputs[0][i][j] = nodes[i][j].rawOutput(outputs[1][i - 1]);
+                    outputs[1][i][j] = sigmoid(outputs[0][i][j]);
+                    outputs[2][i][j] = sigmoidPrime(outputs[0][i][j]);
                 }
             }
+            double[] firstCost = outputs[1][outputs[1].length - 1].clone();
+            for (int i = 0; i < firstCost.length; i++)
+                firstCost[i] -= answer[i];
 
         }
     }
