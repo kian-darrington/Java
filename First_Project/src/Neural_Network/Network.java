@@ -3,7 +3,6 @@ package Neural_Network;
 import java.util.Random;
 
 public class Network {
-    final static double BIAS_RANGE = 20; //Random num from -10 to 10
     final static double WEIGHT_RANGE = 4; // Random num from -2 to 2
     static Node[][] nodes;
     static final Random rand = new Random();
@@ -16,7 +15,6 @@ public class Network {
         for (int i = 1; i < layerNum; i++){
             nodes[i] = new Node[layerNums[i]];
             for (int j = 0; j < nodes[i].length; j++){
-                nodes[i][j].setBias((rand.nextDouble() - .5) * BIAS_RANGE);
                 nodes[i][j].setWeights(randWeights(layerNums[i - 1]));
             }
         }
@@ -58,6 +56,15 @@ public class Network {
             weights[i] = new double[layerCounts[i + 1]][];
             for (int o = 0; o < layerCounts[i + 1]; o++)
                 weights[i][o] = nodes[i + 1][o].getWeights();
+        }
+        double[][][] weightsTranspose = new double[layerNum - 1][][];
+        for (int i = 0; i < layerNum - 1; i++) {
+            weightsTranspose[i] = new double[layerCounts[i]][];
+            for (int o = 0; o < layerCounts[i]; o++) {
+                weightsTranspose[i][o] = new double[layerCounts[i + 1]];
+                for (int q = 0; q < layerCounts[i + 1]; q++)
+                    weightsTranspose[i][o][q] = weights[i][q][o];
+            }
         }
 
         for (int[] picture : miniBatch) {
