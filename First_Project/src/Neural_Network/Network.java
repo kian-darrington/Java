@@ -50,7 +50,10 @@ public class Network {
 
         return next;
     }
-    static void backPropagate(int[][] miniBatch, double[] answer){
+    public static void backPropagate(int[][] miniBatch, double[] answer){
+        double[][][][] totalError = new double[2][answer.length][][]; // First is biases
+        // Second is weights
+
         double[][][] weights = new double[layerNum - 1][][];
         for (int i = 0; i < layerNum - 1; i++) {
             weights[i] = new double[layerCounts[i + 1]][];
@@ -59,9 +62,8 @@ public class Network {
         }
         double[][][] weightsTranspose = new double[layerNum - 1][][];
         for (int i = 0; i < layerNum - 1; i++) {
-            weightsTranspose[i] = new double[layerCounts[i]][];
+            weightsTranspose[i] = new double[layerCounts[i]][layerCounts[i + 1]];
             for (int o = 0; o < layerCounts[i]; o++) {
-                weightsTranspose[i][o] = new double[layerCounts[i + 1]];
                 for (int q = 0; q < layerCounts[i + 1]; q++)
                     weightsTranspose[i][o][q] = weights[i][q][o];
             }
@@ -95,16 +97,21 @@ public class Network {
             double[][] costs = new double[layerNum][];
             for (int i = 0; i < layerNum - 1; i++)
                 costs[i] = new double[layerCounts[i]];
-            costs[layerNum -1] = outputs[1][layerCounts[layerNum - 1]].clone();
             for (int i = 0; i < layerNum; i++)
-                    outputs[1][outputs[1].length - 1].clone();
-            for (int i = 0; i < costs[layerNum -1].length; i++) {
+                costs[i] = outputs[1][i].clone(); //Gathers the outputs of all the network
+            for (int i = 0; i < costs[layerNum - 1].length; i++) {
                 costs[layerNum -1][i] -= answer[i]; //Gets you the rate of change of the output based off of the activation
                 costs[layerNum -1][i] *= outputs[2][outputs.length-1][i];
             }
             for (int i = layerNum -2; i > -1; i--){
                 for (int j = 0; j < costs[i].length; i++){
-
+                    double temp = 0;
+                    for (int d = 0; d < costs[i + 1].length; d++) {
+                        final double constant = costs[i + 1][d];
+                        for (double t : weightsTranspose[i][d])
+                            temp += constant * t;
+                    }
+                    costs[i][j] *= temp;
                 }
             }
 

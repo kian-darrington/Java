@@ -38,7 +38,17 @@ public class JavaTest {
         return temp;
     }
     public static void main(String[] args) {
-        Scanner console = new Scanner(System.in);
-        System.out.println((char) 0x2588);
+        int[][] weights = new int[][] {{0, 2, 3},
+                                             {4, 6, 7}};
+
+        int[][] weightsTranspose = new int[weights[0].length][weights.length];
+        for (int o = 0; o < weights[0].length; o++) {
+            for (int q = 0; q < weights.length; q++)
+                weightsTranspose[o][q] = weights[q][o];
+        }
+        for (int[] w : weights)
+            System.out.println(Arrays.toString(w));
+        for (int[] w : weightsTranspose)
+            System.out.println(Arrays.toString(w));
     }
 }
