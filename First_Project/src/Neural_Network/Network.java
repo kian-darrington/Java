@@ -52,9 +52,9 @@ public class Network {
         return next;
     }
     public static void backPropagate(int[][] miniBatch, double[] answer) {
-        double[][][] biasError = new double[answer.length][][]; // First is biases
-        double[][][][] weightError = new double[answer.length][][][]; // Second is weights
-
+        int batchSize = answer.length;
+        double[][][] biasError = new double[batchSize][layerNum - 1][]; // First is biases
+        double[][][][] weightError = new double[batchSize][layerNum - 1][][]; // Second is weights
         double[][][] weights = new double[layerNum - 1][][];
         for (int i = 0; i < layerNum - 1; i++) {
             weights[i] = new double[layerCounts[i + 1]][];
@@ -70,7 +70,7 @@ public class Network {
             }
         }
 
-        for (int count = 0; count < miniBatch.length; count++) {
+        for (int count = 0; count < batchSize; count++) {
             int[] picture = miniBatch[count];
             double[][][] outputs = new double[3][layerNum][]; // 0 is raw data, 1 is sigmoid data, 2 is sigPrime
             double[][] input = new double[picture.length][1];
@@ -97,42 +97,50 @@ public class Network {
                 }
             }
             double[][] costs = new double[layerNum - 1][];
-//            for (int i = 1; i < layerNum; i++) //Remember this
-//                costs[i - 1] = new double[layerCounts[i]];
             for (int i = 1; i < layerNum; i++)
-                costs[i - 1] = outputs[1][i].clone(); //Gathers the outputs of all the network past the input
+                costs[i - 1] = outputs[2][i].clone(); //Gathers the primes of outputs of all the network past the input
             for (int i = 0; i < layerCounts[layerNum - 1]; i++) {
-                costs[layerNum - 1][i] -= answer[i]; //Gets you the rate of change of the output based off of the activation
-                costs[layerNum - 1][i] *= outputs[2][layerNum - 1][i];
+                //Gets you the rate of change of the output based off of the activation
+                costs[layerNum - 2][i] *= outputs[1][layerNum - 1][i] - answer[i];
             }
-            for (int i = layerNum - 2; i > -1; i--) {
-                for (int j = 0; j < layerCounts[i]; j++) {
-                    double temp = 0;
-                    for (int d = 0; d < costs[i + 1].length; d++) {
-                        double constant = costs[i + 1][d];
-                        for (double t : weightsTranspose[i][d])
-                            temp += constant * t;
+            for (int i = layerNum - 1; i > 0; i--) {
+                if (i < layerNum - 1) {
+                    for (int j = 0; j < layerCounts[i]; j++) {
+                        double temp = 0;
+                        for (int d = 0; d < layerCounts[i + 1]; d++) {
+                            double forwardCost = costs[i][d];
+                            for (double t : weightsTranspose[i][d])
+                                temp += forwardCost * t;
+                        }
+                        costs[i][j] *= temp;
                     }
-                    costs[i][j] *= temp;
                 }
-                biasError[count][i] = costs[i];
-                double[][] weightChange = new double[layerCounts[i]][];
-                for (int j = 0; j < costs[i].length; j++)
-                    weightChange[j] *= outputs[1][i][j];
+                biasError[count][i - 1] = costs[i - 1];
+                double[][] weightChange = new double[layerCounts[i]][layerCounts[i - 1]];
+                for (int j = 0; j < layerCounts[i]; j++) {
+                    double temp = costs[i][j];
+                    for (int h = 0; h < layerCounts[i - 1]; h++)
+                        weightChange[j][h] = temp * outputs[2][i - 1][h];
+                }
 
-                totalError[1][count][i] = weightChange;
+                weightError[count][i - 1] = weightChange;
             }
         }
 
         for (int i = 0; i < layerNum - 1; i++) {
-            double[] biasAverage = new double[layerCounts[i]];
+            double[] biasAverage = new double[layerCounts[i + 1]];
+            double[][] weightAverage = new double[layerCounts[i + 1]][layerCounts[i]];
             for (int count = 0; count < miniBatch.length; count++) {
-                for (int r = 0; r < layerCounts[i]; r++) {
+                for (int r = 0; r < layerCounts[i + 1]; r++) {
                     biasAverage[r] += biasError[count][i][r];
+                    for (int g = 0; g < layerCounts[i]; g++)
+                        weightAverage[r][g] += weightError[count][i][r][g];
                 }
             }
-            for (int r = 0; r < layerCounts[i]; r++) {
-                biasAverage[r] *= LEARNING_RATE / (double) answer.length;
+            for (int r = 0; r < layerCounts[i + 1]; r++) {
+                biasAverage[r] *= LEARNING_RATE / (double) batchSize;
+                for (int k = 0; k < layerCounts[i]; k++)
+                    weightAverage[r][k] *= LEARNING_RATE / (double) batchSize;
                 nodes[i + 1][r].changeBias(biasAverage[r]);
             }
         }
