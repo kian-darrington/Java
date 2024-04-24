@@ -13,6 +13,7 @@ public class Training {
     static final Random rand = new Random();
     static byte[] labels;
     static int[] networkFormat;
+    public static final int MINI_BATCH_SIZE = 100;
     public static final int SECOND_LAYER_COUNT = 32;
     public static void getData(){
         InputStream f;
@@ -87,6 +88,11 @@ public class Training {
     public static void main (String[] args){
         getData();
         shuffleData();
+        Network net = new Network(new int[]{num, SECOND_LAYER_COUNT, 10});
+        System.out.println("Got all data and initialized network");
+        for (int i = 0; i < allInfo.length / MINI_BATCH_SIZE; i++){
+            
+        }
     }
     static void outputNum(int n){
         for (int i = 0; i < pixelCount; i++) {

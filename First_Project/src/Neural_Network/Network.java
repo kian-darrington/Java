@@ -142,6 +142,7 @@ public class Network {
                 for (int k = 0; k < layerCounts[i]; k++)
                     weightAverage[r][k] *= LEARNING_RATE / (double) batchSize;
                 nodes[i + 1][r].changeBias(biasAverage[r]);
+                nodes[i + 1][r].changeWeights(weightAverage[r]);
             }
         }
     }

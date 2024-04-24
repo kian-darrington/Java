@@ -21,5 +21,9 @@ public class Node {
         return total + bias;
     }
     void changeBias(double amount) {bias -= amount;}
+    void changeWeights(double[] w){
+        for (int i = 0; i < weights.length; i++)
+            weights[i] -= w[i];
+    }
     double sigmoid(double x){ return (1 / (1 + Math.exp(-x)));}
 }
