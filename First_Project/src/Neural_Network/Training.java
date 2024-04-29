@@ -88,10 +88,17 @@ public class Training {
     public static void main (String[] args){
         getData();
         shuffleData();
-        Network net = new Network(new int[]{num, SECOND_LAYER_COUNT, 10});
+        Network net = new Network(networkFormat);
         System.out.println("Got all data and initialized network");
         for (int i = 0; i < allInfo.length / MINI_BATCH_SIZE; i++){
-            
+            int[][] miniBatch = new int[MINI_BATCH_SIZE][pixelCount];
+            int[] answers = new int[MINI_BATCH_SIZE];
+            for (int j = 0; j < MINI_BATCH_SIZE; j++) {
+                miniBatch[j] = allInfo[i * MINI_BATCH_SIZE + j];
+                answers[j] = labels[i * MINI_BATCH_SIZE + j];
+            }
+            net.backPropagate(miniBatch, answers);
+            System.out.println("mini Batch done");
         }
     }
     static void outputNum(int n){

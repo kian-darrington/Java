@@ -13,6 +13,7 @@ public class Network {
         layerNum = layerNums.length;
         layerCounts = layerNums;
         nodes = new Node[layerNum][];
+        nodes[0] = new Node[layerNums[0]];
         for (int i = 1; i < layerNum; i++){
             nodes[i] = new Node[layerNums[i]];
             for (int j = 0; j < nodes[i].length; j++){
@@ -29,7 +30,7 @@ public class Network {
     }
     //Returns an array of the last output of the neural network, 10 elements with an ideal of 1 of those elements
     //being a 1 with the rest being a 0, meaning that the picture is that number
-    static double[] feedForward(int[] picture){
+    public static double[] feedForward(int[] picture){
         //Changes the format to the accepted input of the Nodes (a double[])
         //Due to the fact that the input is only one number, this a giant column vector
         double[][] input = new double[picture.length][1];
@@ -51,8 +52,11 @@ public class Network {
 
         return next;
     }
-    public static void backPropagate(int[][] miniBatch, double[] answer) {
-        int batchSize = answer.length;
+    public void backPropagate(int[][] miniBatch, int[] ans) {
+        int batchSize = ans.length;
+        double[][] answers = new double[batchSize][10];
+        for (int i =0; i < batchSize; i++)
+            answers[i][ans[i]] = ans[i];
         double[][][] biasError = new double[batchSize][layerNum - 1][]; // First is biases
         double[][][][] weightError = new double[batchSize][layerNum - 1][][]; // Second is weights
         double[][][] weights = new double[layerNum - 1][][];
@@ -101,7 +105,7 @@ public class Network {
                 costs[i - 1] = outputs[2][i].clone(); //Gathers the primes of outputs of all the network past the input
             for (int i = 0; i < layerCounts[layerNum - 1]; i++) {
                 //Gets you the rate of change of the output based off of the activation
-                costs[layerNum - 2][i] *= outputs[1][layerNum - 1][i] - answer[i];
+                costs[layerNum - 2][i] *= outputs[1][layerNum - 1][i] - answers[count][i];
             }
             for (int i = layerNum - 1; i > 0; i--) {
                 if (i < layerNum - 1) {
