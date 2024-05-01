@@ -6,17 +6,20 @@ public class Network {
     final static double WEIGHT_RANGE = 4; // Random num from -2 to 2
     static Node[][] nodes;
     static final Random rand = new Random();
-    static final double LEARNING_RATE = 0.02;
+    static final double LEARNING_RATE = 0.2;
     static int layerNum;
     static int[] layerCounts;
-    Network(int[] layerNums){
+    public Network(int[] layerNums){
         layerNum = layerNums.length;
         layerCounts = layerNums;
         nodes = new Node[layerNum][];
         nodes[0] = new Node[layerNums[0]];
+        for(int i = 0; i < layerNums[0]; i++)
+            nodes[0][i] = new Node();
         for (int i = 1; i < layerNum; i++){
             nodes[i] = new Node[layerNums[i]];
             for (int j = 0; j < nodes[i].length; j++){
+                nodes[i][j] = new Node();
                 nodes[i][j].setWeights(randWeights(layerNums[i - 1]));
             }
         }
@@ -30,7 +33,7 @@ public class Network {
     }
     //Returns an array of the last output of the neural network, 10 elements with an ideal of 1 of those elements
     //being a 1 with the rest being a 0, meaning that the picture is that number
-    public static double[] feedForward(int[] picture){
+    public double[] feedForward(int[] picture){
         //Changes the format to the accepted input of the Nodes (a double[])
         //Due to the fact that the input is only one number, this a giant column vector
         double[][] input = new double[picture.length][1];
@@ -109,7 +112,7 @@ public class Network {
             }
             for (int i = layerNum - 1; i > 0; i--) {
                 if (i < layerNum - 1) {
-                    for (int j = 0; j < layerCounts[i]; j++) {
+                    for (int j = 0; j < layerCounts[i + 1]; j++) {
                         double temp = 0;
                         for (int d = 0; d < layerCounts[i + 1]; d++) {
                             double forwardCost = costs[i][d];
@@ -122,7 +125,7 @@ public class Network {
                 biasError[count][i - 1] = costs[i - 1];
                 double[][] weightChange = new double[layerCounts[i]][layerCounts[i - 1]];
                 for (int j = 0; j < layerCounts[i]; j++) {
-                    double temp = costs[i][j];
+                    double temp = costs[i - 1][j];
                     for (int h = 0; h < layerCounts[i - 1]; h++)
                         weightChange[j][h] = temp * outputs[2][i - 1][h];
                 }

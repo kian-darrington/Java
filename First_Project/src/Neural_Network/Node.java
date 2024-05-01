@@ -6,24 +6,25 @@ public class Node {
     int size = 1;
     double bias = 0;
     void setBias(double b) {bias = b;}
-    void setWeights(double [] w) {weights = w; size = w.length;}
-    double [] getWeights () {return weights;}
-    double output(double[] input) {
+    public void setWeights(double [] w) {weights = w; size = w.length;}
+    public double [] getWeights () {return weights;}
+    public double output(double[] input) {
         double total = 0;
         for (int i = 0; i < size; i++)
             total += weights[i] * input[i];
         return sigmoid(total + bias);
     }
-    double rawOutput(double[] input){
+    public double rawOutput(double[] input){
         double total = 0;
         for (int i = 0; i < size; i++)
             total += weights[i] * input[i];
         return total + bias;
     }
-    void changeBias(double amount) {bias -= amount;}
-    void changeWeights(double[] w){
+    public void changeBias(double amount) {bias -= amount;}
+    public void changeWeights(double[] w){
         for (int i = 0; i < weights.length; i++)
             weights[i] -= w[i];
     }
-    double sigmoid(double x){ return (1 / (1 + Math.exp(-x)));}
+    Node(){}
+    public double sigmoid(double x){ return (1 / (1 + Math.exp(-x)));}
 }

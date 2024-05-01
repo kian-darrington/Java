@@ -10,8 +10,10 @@ public class Training {
     static Scanner console = new Scanner(System.in);
     static int row = 0, num = 0, column, pixelCount = 0;
     static int[][] allInfo;
+    static int[][] testInfo;
     static final Random rand = new Random();
     static byte[] labels;
+    static byte[] testLabels;
     static int[] networkFormat;
     public static final int MINI_BATCH_SIZE = 100;
     public static final int SECOND_LAYER_COUNT = 32;
@@ -88,8 +90,10 @@ public class Training {
     public static void main (String[] args){
         getData();
         shuffleData();
+        getTrainingData();
         Network net = new Network(networkFormat);
         System.out.println("Got all data and initialized network");
+        System.out.println("Before: %" + errorCheck(net));
         for (int i = 0; i < allInfo.length / MINI_BATCH_SIZE; i++){
             int[][] miniBatch = new int[MINI_BATCH_SIZE][pixelCount];
             int[] answers = new int[MINI_BATCH_SIZE];
@@ -98,8 +102,26 @@ public class Training {
                 answers[j] = labels[i * MINI_BATCH_SIZE + j];
             }
             net.backPropagate(miniBatch, answers);
-            System.out.println("mini Batch done");
         }
+        System.out.println("After: %" + errorCheck(net));
+    }
+    static double errorCheck (Network net){
+        double numCorrect = 0;
+        int size = testInfo.length;
+        for (int i = 0; i < size; i++){
+            double[] ans = net.feedForward(testInfo[i]);
+            double totalAns = 0;
+            int index = 0;
+            for (int d = 0; d < 10; d++) {
+                if (ans[d] > totalAns) {
+                    totalAns = ans[d];
+                    index = d;
+                }
+            }
+            if (index == testLabels[i])
+                numCorrect++;
+        }
+        return 100 * numCorrect / size;
     }
     static void outputNum(int n){
         for (int i = 0; i < pixelCount; i++) {
@@ -114,5 +136,58 @@ public class Training {
     }
     static double sigmoid(double x){
         return (1 / (1 + Math.exp(-x)));
+    }
+    static void getTrainingData(){
+        InputStream f;
+        try {
+            f = new FileInputStream(new File(BACKBONE + TEST_IMAGES));
+        } catch (FileNotFoundException e) {
+            throw new RuntimeException(e);
+        }
+        try {
+            int magic = new BigInteger(f.readNBytes(4)).intValue();
+            int NUM = new BigInteger(f.readNBytes(4)).intValue();
+            int ROW = new BigInteger(f.readNBytes(4)).intValue();
+            int COL = new BigInteger(f.readNBytes(4)).intValue();
+            byte[] temp = f.readAllBytes();
+            testInfo = new int[NUM][pixelCount];
+            int size = temp.length;
+            int count = 0, subCount = 0;
+            for (long i = 0; i < size; i++) {
+                if (temp[(int) i] < 0)
+                    testInfo[count][subCount] = 128 - temp[(int) i];
+
+                else
+                    testInfo[count][subCount] = temp[(int) i];
+                subCount++;
+                if ((i + 1) % pixelCount == 0) {
+                    count++;
+                    subCount = 0;
+                }
+            }
+            System.out.println(magic + ", " + NUM + ", " + row +" by " + column);
+            f.close();
+        } catch (IOException e) {
+            throw new RuntimeException(e);
+        }
+        try {
+            f = new FileInputStream(new File(BACKBONE + TEST_LABELS));
+        } catch (FileNotFoundException e) {
+            throw new RuntimeException(e);
+        }
+        try {
+            int magic = new BigInteger(f.readNBytes(4)).intValue();
+            int labelNum = new BigInteger(f.readNBytes(4)).intValue();
+            byte[] temp = f.readAllBytes();
+            testLabels = new byte[labelNum];
+            int size = temp.length;
+            for (long i = 0; i < size; i++) {
+                testLabels[(int) i] = temp[(int)i];
+            }
+            System.out.println(magic + ", " + labelNum);
+            f.close();
+        } catch (IOException e) {
+            throw new RuntimeException(e);
+        }
     }
 }
