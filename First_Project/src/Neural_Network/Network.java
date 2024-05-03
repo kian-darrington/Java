@@ -59,7 +59,7 @@ public class Network {
         int batchSize = ans.length;
         double[][] answers = new double[batchSize][10];
         for (int i =0; i < batchSize; i++)
-            answers[i][ans[i]] = ans[i];
+            answers[i][ans[i]] = 1.0;
         double[][][] biasError = new double[batchSize][layerNum - 1][]; // First is biases
         double[][][][] weightError = new double[batchSize][layerNum - 1][][]; // Second is weights
         double[][][] weights = new double[layerNum - 1][][];
@@ -86,7 +86,7 @@ public class Network {
                     outputs[j][i] = new double[layerCounts[i]];
             }
             for (int i = 0; i < picture.length; i++) {
-                input[i][0] = (double) picture[i] / 255;
+                input[i][0] = (double) picture[i] / 255.0;
             }
             // Next receives the output of the entire first layer
             double[] next = new double[picture.length];
@@ -153,6 +153,6 @@ public class Network {
             }
         }
     }
-    static double sigmoid(double x){ return (1 / (1 + Math.exp(-x)));}
-    static double sigmoidPrime(double x) { return sigmoid(x)*(1-sigmoid(x)); }
+    static double sigmoid(double x){ return (1.0 / (1.0 + Math.exp(-x)));}
+    static double sigmoidPrime(double x) { return sigmoid(x)*(1.0 - sigmoid(x)); }
 }

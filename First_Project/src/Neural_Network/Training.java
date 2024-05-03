@@ -94,16 +94,18 @@ public class Training {
         Network net = new Network(networkFormat);
         System.out.println("Got all data and initialized network");
         System.out.println("Before: %" + errorCheck(net));
-        for (int i = 0; i < allInfo.length / MINI_BATCH_SIZE; i++){
-            int[][] miniBatch = new int[MINI_BATCH_SIZE][pixelCount];
-            int[] answers = new int[MINI_BATCH_SIZE];
-            for (int j = 0; j < MINI_BATCH_SIZE; j++) {
-                miniBatch[j] = allInfo[i * MINI_BATCH_SIZE + j];
-                answers[j] = labels[i * MINI_BATCH_SIZE + j];
+        while (true) {
+            for (int i = 0; i < allInfo.length / MINI_BATCH_SIZE; i++) {
+                int[][] miniBatch = new int[MINI_BATCH_SIZE][pixelCount];
+                int[] answers = new int[MINI_BATCH_SIZE];
+                for (int j = 0; j < MINI_BATCH_SIZE; j++) {
+                    miniBatch[j] = allInfo[i * MINI_BATCH_SIZE + j];
+                    answers[j] = labels[i * MINI_BATCH_SIZE + j];
+                }
+                net.backPropagate(miniBatch, answers);
             }
-            net.backPropagate(miniBatch, answers);
+            System.out.println("After: %" + errorCheck(net));
         }
-        System.out.println("After: %" + errorCheck(net));
     }
     static double errorCheck (Network net){
         double numCorrect = 0;
