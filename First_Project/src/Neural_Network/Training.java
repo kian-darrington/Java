@@ -15,7 +15,7 @@ public class Training {
     static byte[] labels;
     static byte[] testLabels;
     static int[] networkFormat;
-    public static final int MINI_BATCH_SIZE = 100;
+    public static final int MINI_BATCH_SIZE = 200;
     public static final int SECOND_LAYER_COUNT = 32;
     public static void getData(){
         InputStream f;
@@ -104,7 +104,7 @@ public class Training {
                 }
                 net.backPropagate(miniBatch, answers);
             }
-            System.out.println("After: %" + errorCheck(net));
+            System.out.println("After: " + errorCheck(net) + "%");
         }
     }
     static double errorCheck (Network net){
@@ -112,6 +112,7 @@ public class Training {
         int size = testInfo.length;
         for (int i = 0; i < size; i++){
             double[] ans = net.feedForward(testInfo[i]);
+            System.out.println(Arrays.toString(ans));
             double totalAns = 0;
             int index = 0;
             for (int d = 0; d < 10; d++) {

@@ -1,5 +1,6 @@
 package Neural_Network;
 
+import java.util.Arrays;
 import java.util.Random;
 
 public class Network {
@@ -58,7 +59,7 @@ public class Network {
     public void backPropagate(int[][] miniBatch, int[] ans) {
         int batchSize = ans.length;
         double[][] answers = new double[batchSize][10];
-        for (int i =0; i < batchSize; i++)
+        for (int i = 0; i < batchSize; i++)
             answers[i][ans[i]] = 1.0;
         double[][][] biasError = new double[batchSize][layerNum - 1][]; // First is biases
         double[][][][] weightError = new double[batchSize][layerNum - 1][][]; // Second is weights
@@ -119,7 +120,7 @@ public class Network {
                             for (double t : weightsTranspose[i][d])
                                 temp += forwardCost * t;
                         }
-                        costs[i][j] *= temp;
+                        costs[i - 1][j] *= temp;
                     }
                 }
                 biasError[count][i - 1] = costs[i - 1];
@@ -143,7 +144,7 @@ public class Network {
                     for (int g = 0; g < layerCounts[i]; g++)
                         weightAverage[r][g] += weightError[count][i][r][g];
                 }
-            }
+            } //weightError = new double[batchSize][layerNum - 1][][];
             for (int r = 0; r < layerCounts[i + 1]; r++) {
                 biasAverage[r] *= LEARNING_RATE / (double) batchSize;
                 for (int k = 0; k < layerCounts[i]; k++)
