@@ -109,17 +109,15 @@ public class Network {
                 costs[i - 1] = outputs[2][i].clone(); //Gathers the primes of outputs of all the network past the input
             for (int i = 0; i < layerCounts[layerNum - 1]; i++) {
                 //Gets you the rate of change of the output based off of the activation
-                costs[layerNum - 2][i] *= outputs[1][layerNum - 1][i] - answers[count][i];
+                costs[layerNum - 2][i] *= answers[count][i] - outputs[1][layerNum - 1][i];
             }
             for (int i = layerNum - 1; i > 0; i--) {
                 if (i < layerNum - 1) {
                     for (int j = 0; j < layerCounts[i + 1]; j++) {
                         double temp = 0;
-                        for (int d = 0; d < layerCounts[i + 1]; d++) {
-                            double forwardCost = costs[i][d];
-                            for (double t : weightsTranspose[i][d])
-                                temp += forwardCost * t;
-                        }
+                        double forwardCost = costs[i][j];
+                        for (double t : weightsTranspose[i][j])
+                            temp += forwardCost * t;
                         costs[i - 1][j] *= temp;
                     }
                 }

@@ -112,7 +112,6 @@ public class Training {
         int size = testInfo.length;
         for (int i = 0; i < size; i++){
             double[] ans = net.feedForward(testInfo[i]);
-            System.out.println(Arrays.toString(ans));
             double totalAns = 0;
             int index = 0;
             for (int d = 0; d < 10; d++) {
@@ -124,18 +123,21 @@ public class Training {
             if (index == testLabels[i])
                 numCorrect++;
         }
+        int temp = rand.nextInt(testInfo.length);
+        outputNum(testInfo[temp]);
+        System.out.println(testLabels[temp]);
+        System.out.println(Arrays.toString(net.feedForward(testInfo[temp])));
         return 100 * numCorrect / size;
     }
-    static void outputNum(int n){
+    static void outputNum(int[] n){
         for (int i = 0; i < pixelCount; i++) {
-            if (allInfo[n][i] != 0)
+            if (n[i] != 0)
                 System.out.print((char) 0x2588);
             else
                 System.out.print(' ');
             if ((i + 1) % row == 0)
                 System.out.println();
         }
-        System.out.println("Correct Answer: " +labels[n]);
     }
     static double sigmoid(double x){
         return (1 / (1 + Math.exp(-x)));

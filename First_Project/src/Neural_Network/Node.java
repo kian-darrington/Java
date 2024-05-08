@@ -20,10 +20,10 @@ public class Node {
             total += weights[i] * input[i];
         return total + bias;
     }
-    public void changeBias(double amount) {bias -= amount;}
+    public void changeBias(double amount) {bias += amount;}
     public void changeWeights(double[] w){
         for (int i = 0; i < weights.length; i++)
-            weights[i] -= w[i];
+            weights[i] += w[i];
     }
     Node(){}
     public double sigmoid(double x){ return (1 / (1 + Math.exp(-x)));}
