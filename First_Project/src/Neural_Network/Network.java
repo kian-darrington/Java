@@ -4,10 +4,10 @@ import java.util.Arrays;
 import java.util.Random;
 
 public class Network {
-    final static double WEIGHT_RANGE = 4; // Random num from -2 to 2
+    final static double WEIGHT_RANGE = 2; // Random num from -2 to 2
     static Node[][] nodes;
     static final Random rand = new Random();
-    static final double LEARNING_RATE = 0.2;
+    static final double LEARNING_RATE = 0.0;
     static int layerNum;
     static int[] layerCounts;
     public Network(int[] layerNums){
