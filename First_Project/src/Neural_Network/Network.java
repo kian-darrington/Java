@@ -63,19 +63,14 @@ public class Network {
             answers[i][ans[i]] = 1.0;
         double[][][] biasError = new double[batchSize][layerNum - 1][]; // First is biases
         double[][][][] weightError = new double[batchSize][layerNum - 1][][]; // Second is weights
-        double[][][] weights = new double[layerNum - 1][][];
+        Matrix[] weights = new Matrix[layerNum - 1];
+        Matrix[] weightsTranspose = new Matrix[layerNum - 1];
         for (int i = 0; i < layerNum - 1; i++) {
-            weights[i] = new double[layerCounts[i + 1]][];
+            double[][] temp = new double[layerCounts[i + 1]][];
             for (int o = 0; o < layerCounts[i + 1]; o++)
-                weights[i][o] = nodes[i + 1][o].getWeights();
-        }
-        double[][][] weightsTranspose = new double[layerNum - 1][][];
-        for (int i = 0; i < layerNum - 1; i++) {
-            weightsTranspose[i] = new double[layerCounts[i]][layerCounts[i + 1]];
-            for (int o = 0; o < layerCounts[i]; o++) {
-                for (int q = 0; q < layerCounts[i + 1]; q++)
-                    weightsTranspose[i][o][q] = weights[i][q][o];
-            }
+                temp[o] = nodes[i + 1][o].getWeights();
+            weights[i] = new Matrix(temp);
+            weightsTranspose[i] = weights[i].transpose();
         }
 
         for (int count = 0; count < batchSize; count++) {
@@ -104,13 +99,17 @@ public class Network {
                     outputs[2][i][j] = sigmoidPrime(outputs[0][i][j]);
                 }
             }
-            double[][] costs = new double[layerNum - 1][];
-            for (int i = 1; i < layerNum; i++)
-                costs[i - 1] = outputs[2][i].clone(); //Gathers the primes of outputs of all the network past the input
+            Matrix[][] outputMatrix = new Matrix[3][layerNum];
+            for (int j = 0; j < 3; j++)
+                for (int q = 0; q < layerNum; q++)
+                    outputMatrix[j][q] = new Matrix(new double[][] {outputs[j][q]});
+            double[] costs = new double[layerCounts[layerNum - 1]];
             for (int i = 0; i < layerCounts[layerNum - 1]; i++) {
                 //Gets you the rate of change of the output based off of the activation
-                costs[layerNum - 2][i] *= answers[count][i] - outputs[1][layerNum - 1][i];
+                costs[i] *= (answers[count][i] - outputs[1][layerNum - 1][i]) * outputs[2][layerNum - 1][i];
             }
+            Matrix[] costMatrix = new Matrix[layerNum - 1];
+            costMatrix[layerNum - 1] = new Matrix(new double[][] {costs} );
             for (int i = layerNum - 1; i > 0; i--) {
                 if (i < layerNum - 1) {
                     for (int j = 0; j < layerCounts[i + 1]; j++) {
@@ -120,6 +119,7 @@ public class Network {
                             temp += forwardCost * t;
                         costs[i - 1][j] *= temp;
                     }
+                    costMatrix[i - 1] = costMatrix[i].dotProd(weightsTranspose[i]).elemProd(outputMatrix[3]);
                 }
                 biasError[count][i - 1] = costs[i - 1];
                 double[][] weightChange = new double[layerCounts[i]][layerCounts[i - 1]];

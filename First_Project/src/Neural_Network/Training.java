@@ -88,7 +88,7 @@ public class Training {
         allInfo = tempNums;
     }
     public static void main (String[] args){
-        getData();
+        /*getData();
         shuffleData();
         getTrainingData();
         Network net = new Network(networkFormat);
@@ -105,7 +105,11 @@ public class Training {
                 net.backPropagate(miniBatch, answers);
             }
             System.out.println("After: " + errorCheck(net) + "%");
-        }
+        }*/
+        Matrix one = new Matrix(new double[][] {new double[] {1, 2}, new double[] {4, 5}, new double[] {3, 4}});
+        Matrix two = new Matrix(new double[][] {new double[] {5, 4, 5}, new double[] {2, 8, 1}});
+        System.out.println(one);
+        System.out.println(one.transpose());
     }
     static double errorCheck (Network net){
         double numCorrect = 0;
