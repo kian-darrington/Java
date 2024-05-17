@@ -38,17 +38,14 @@ public class JavaTest {
         return temp;
     }
     public static void main(String[] args) {
-        int[][] weights = new int[][] {{0, 2, 3},
-                                             {4, 6, 7}};
-
-        int[][] weightsTranspose = new int[weights[0].length][weights.length];
-        for (int o = 0; o < weights[0].length; o++) {
-            for (int q = 0; q < weights.length; q++)
-                weightsTranspose[o][q] = weights[q][o];
+        Random rand = new Random();
+        int[] sixes = new int[13];
+        int[] eleven = new int[13];
+        for (int i = 0; i < 100000; i++){
+            sixes[2 + rand.nextInt(6) + rand.nextInt(6)]++;
+            eleven[2 + rand.nextInt(11)]++;
         }
-        for (int[] w : weights)
-            System.out.println(Arrays.toString(w));
-        for (int[] w : weightsTranspose)
-            System.out.println(Arrays.toString(w));
+        System.out.println(Arrays.toString(sixes));
+        System.out.println(Arrays.toString(eleven));
     }
 }

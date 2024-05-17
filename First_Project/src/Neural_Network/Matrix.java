@@ -42,6 +42,20 @@ public class Matrix {
 
         return new Matrix(product);
     }
+    public Matrix add(Matrix other) {
+        if (this.row != other.row || this.col != other.col) {
+            throw new IllegalArgumentException("Matrix dimensions do not match for Matrix addition.");
+        }
+
+        double[][] product = new double[this.row][this.col];
+        for (int i = 0; i < this.row; i++) {
+            for (int j = 0; j < this.col; j++) {
+                product[i][j] = this.values[i][j] + other.values[i][j];
+            }
+        }
+
+        return new Matrix(product);
+    }
     public Matrix transpose(){
         double[][] trans = new double[col][row];
         for (int i = 0; i < col; i++)
@@ -56,5 +70,9 @@ public class Matrix {
             string.append('\n');
         }
         return string.toString();
+    }
+
+    public double[][] getValues() {
+        return values;
     }
 }

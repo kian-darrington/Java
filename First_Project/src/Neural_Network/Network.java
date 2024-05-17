@@ -61,8 +61,8 @@ public class Network {
         double[][] answers = new double[batchSize][10];
         for (int i = 0; i < batchSize; i++)
             answers[i][ans[i]] = 1.0;
-        double[][][] biasError = new double[batchSize][layerNum - 1][]; // First is biases
-        double[][][][] weightError = new double[batchSize][layerNum - 1][][]; // Second is weights
+        Matrix[][] biasError = new Matrix[batchSize][layerNum - 1]; // First is biases
+        Matrix[][] weightError = new Matrix[batchSize][layerNum - 1]; // Second is weights
         Matrix[] weights = new Matrix[layerNum - 1];
         Matrix[] weightsTranspose = new Matrix[layerNum - 1];
         for (int i = 0; i < layerNum - 1; i++) {
@@ -75,7 +75,7 @@ public class Network {
 
         for (int count = 0; count < batchSize; count++) {
             int[] picture = miniBatch[count];
-            double[][][] outputs = new double[3][layerNum][]; // 0 is raw data, 1 is sigmoid data, 2 is sigPrime
+            double[][][] outputs = new double[2][layerNum][]; // 0 is sigmoid data, 1 is sigPrime
             double[][] input = new double[picture.length][1];
             for (int j = 0; j < outputs.length; j++) {
                 for (int i = 0; i < outputs[j].length; i++)
@@ -87,68 +87,51 @@ public class Network {
             // Next receives the output of the entire first layer
             double[] next = new double[picture.length];
             for (int i = 0; i < picture.length; i++) {
-                outputs[0][0][i] = nodes[0][i].rawOutput(input[i]);
-                outputs[1][0][i] = sigmoid(outputs[0][0][i]);
-                outputs[2][0][i] = sigmoidPrime(outputs[0][0][i]);
+                double raw = nodes[0][i].rawOutput(input[i]);
+                outputs[0][0][i] = sigmoid(raw);
+                outputs[1][0][i] = sigmoidPrime(raw);
             }
             // Next continues feeding forward through the network until the last layer is reached
             for (int i = 1; i < layerNum; i++) {
                 for (int j = 0; j < layerCounts[i]; j++) {
-                    outputs[0][i][j] = nodes[i][j].rawOutput(outputs[1][i - 1]);
-                    outputs[1][i][j] = sigmoid(outputs[0][i][j]);
-                    outputs[2][i][j] = sigmoidPrime(outputs[0][i][j]);
+                    double raw = nodes[i][j].rawOutput(outputs[0][i - 1]);
+                    outputs[0][i][j] = sigmoid(raw);
+                    outputs[1][i][j] = sigmoidPrime(raw);
                 }
             }
-            Matrix[][] outputMatrix = new Matrix[3][layerNum];
-            for (int j = 0; j < 3; j++)
+            Matrix[][] outputMatrix = new Matrix[2][layerNum];
+            for (int j = 0; j < 2; j++)
                 for (int q = 0; q < layerNum; q++)
                     outputMatrix[j][q] = new Matrix(new double[][] {outputs[j][q]});
             double[] costs = new double[layerCounts[layerNum - 1]];
             for (int i = 0; i < layerCounts[layerNum - 1]; i++) {
                 //Gets you the rate of change of the output based off of the activation
-                costs[i] *= (answers[count][i] - outputs[1][layerNum - 1][i]) * outputs[2][layerNum - 1][i];
+                costs[i] *= (answers[count][i] - outputs[0][layerNum - 1][i]) * outputs[1][layerNum - 1][i];
             }
             Matrix[] costMatrix = new Matrix[layerNum - 1];
             costMatrix[layerNum - 1] = new Matrix(new double[][] {costs} );
             for (int i = layerNum - 1; i > 0; i--) {
-                if (i < layerNum - 1) {
-                    for (int j = 0; j < layerCounts[i + 1]; j++) {
-                        double temp = 0;
-                        double forwardCost = costs[i][j];
-                        for (double t : weightsTranspose[i][j])
-                            temp += forwardCost * t;
-                        costs[i - 1][j] *= temp;
-                    }
-                    costMatrix[i - 1] = costMatrix[i].dotProd(weightsTranspose[i]).elemProd(outputMatrix[3]);
-                }
-                biasError[count][i - 1] = costs[i - 1];
-                double[][] weightChange = new double[layerCounts[i]][layerCounts[i - 1]];
-                for (int j = 0; j < layerCounts[i]; j++) {
-                    double temp = costs[i - 1][j];
-                    for (int h = 0; h < layerCounts[i - 1]; h++)
-                        weightChange[j][h] = temp * outputs[2][i - 1][h];
-                }
-
-                weightError[count][i - 1] = weightChange;
+                if (i < layerNum - 1)
+                    costMatrix[i - 1] = costMatrix[i].dotProd(weightsTranspose[i]).elemProd(outputMatrix[1][i]);
+                biasError[count][i - 1] = costMatrix[i - 1];
+                weightError[count][i - 1] = costMatrix[i].dotProd(outputMatrix[0][i].transpose());
             }
         }
-
+        Matrix[] totalWeights = new Matrix[layerNum - 1];
+        Matrix[] totalBiases = new Matrix[layerNum - 1];
         for (int i = 0; i < layerNum - 1; i++) {
-            double[] biasAverage = new double[layerCounts[i + 1]];
-            double[][] weightAverage = new double[layerCounts[i + 1]][layerCounts[i]];
-            for (int count = 0; count < miniBatch.length; count++) {
-                for (int r = 0; r < layerCounts[i + 1]; r++) {
-                    biasAverage[r] += biasError[count][i][r];
-                    for (int g = 0; g < layerCounts[i]; g++)
-                        weightAverage[r][g] += weightError[count][i][r][g];
-                }
-            } //weightError = new double[batchSize][layerNum - 1][][];
-            for (int r = 0; r < layerCounts[i + 1]; r++) {
-                biasAverage[r] *= LEARNING_RATE / (double) batchSize;
-                for (int k = 0; k < layerCounts[i]; k++)
-                    weightAverage[r][k] *= LEARNING_RATE / (double) batchSize;
-                nodes[i + 1][r].changeBias(biasAverage[r]);
-                nodes[i + 1][r].changeWeights(weightAverage[r]);
+            totalWeights[i] = weightError[0][i];
+            totalBiases[i] = biasError[0][i];
+            for (int count = 1; count < batchSize; count++){
+                totalWeights[i] = totalWeights[i].add(weightError[count][i]);
+                totalBiases[i] = totalBiases[i].add(biasError[count][i]);
+            }
+        }
+        for (int i = 0; i < layerNum - 1; i++) {
+            double[][] rawWeight = totalWeights[i].getValues();
+            double[][] rawBias = totalBiases[i].getValues();
+            for (int j = 0; j < layerCounts[i + 1]; j++){
+                
             }
         }
     }
