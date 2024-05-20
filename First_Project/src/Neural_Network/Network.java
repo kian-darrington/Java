@@ -7,7 +7,7 @@ public class Network {
     final static double WEIGHT_RANGE = 2; // Random num from -2 to 2
     static Node[][] nodes;
     static final Random rand = new Random();
-    static final double LEARNING_RATE = 0.0;
+    static final double LEARNING_RATE = 0.2;
     static int layerNum;
     static int[] layerCounts;
     public Network(int[] layerNums){
@@ -106,15 +106,15 @@ public class Network {
             double[] costs = new double[layerCounts[layerNum - 1]];
             for (int i = 0; i < layerCounts[layerNum - 1]; i++) {
                 //Gets you the rate of change of the output based off of the activation
-                costs[i] *= (answers[count][i] - outputs[0][layerNum - 1][i]) * outputs[1][layerNum - 1][i];
+                costs[i] += (answers[count][i] - outputs[0][layerNum - 1][i]) * outputs[1][layerNum - 1][i];
             }
             Matrix[] costMatrix = new Matrix[layerNum - 1];
-            costMatrix[layerNum - 1] = new Matrix(new double[][] {costs} );
+            costMatrix[layerNum - 2] = new Matrix(new double[][] {costs} );
             for (int i = layerNum - 1; i > 0; i--) {
                 if (i < layerNum - 1)
-                    costMatrix[i - 1] = costMatrix[i].dotProd(weightsTranspose[i]).elemProd(outputMatrix[1][i]);
+                    costMatrix[i - 1] = costMatrix[i].dotProd(weights[i]).elemProd(outputMatrix[1][i]);
                 biasError[count][i - 1] = costMatrix[i - 1];
-                weightError[count][i - 1] = costMatrix[i].dotProd(outputMatrix[0][i].transpose());
+                weightError[count][i - 1] = outputMatrix[0][i - 1].transpose().dotProd(costMatrix[i - 1]);
             }
         }
         Matrix[] totalWeights = new Matrix[layerNum - 1];
@@ -128,10 +128,15 @@ public class Network {
             }
         }
         for (int i = 0; i < layerNum - 1; i++) {
-            double[][] rawWeight = totalWeights[i].getValues();
-            double[][] rawBias = totalBiases[i].getValues();
+            double[][] rawWeight = totalWeights[i].transpose().getValues();
+            double[][] rawBias = totalBiases[i].transpose().getValues();
             for (int j = 0; j < layerCounts[i + 1]; j++){
-                
+                rawBias[j][0] *= LEARNING_RATE / (double)batchSize;
+                for (int k = 0; k < layerCounts[i]; k++){
+                    rawWeight[j][k] *= LEARNING_RATE / (double)batchSize;
+                }
+                nodes[i + 1][j].changeWeights(rawWeight[j]);
+                nodes[i + 1][j].changeBias(rawBias[j][0]);
             }
         }
     }

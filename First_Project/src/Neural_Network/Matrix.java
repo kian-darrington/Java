@@ -12,8 +12,10 @@ public class Matrix {
         col = values[0].length;
     }
     public Matrix dotProd(Matrix other){
-        if (other.row != this.col)
-            throw new IllegalArgumentException("BAD CODE IDIOT, IT NO WORK");
+        if (other.row != this.col) {
+            System.out.println(this.row + " " + this.col + " " + other.row + " " + other.col);
+            throw new IllegalArgumentException("BAD CODE IDIOT, IT NO WORK... for dot prod that is");
+        }
         double[][] product = new double[this.row][other.col];
         for (int i = 0; i < this.row; i++) {
             for (int j = 0; j < other.col; j++){
@@ -30,6 +32,7 @@ public class Matrix {
     }
     public Matrix elemProd(Matrix other) {
         if (this.row != other.row || this.col != other.col) {
+            System.out.println(this.row + " " + this.col + " " + other.row + " " + other.col);
             throw new IllegalArgumentException("Matrix dimensions do not match for element-wise multiplication.");
         }
 
