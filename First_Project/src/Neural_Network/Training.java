@@ -9,14 +9,14 @@ public class Training {
     static final String TEST_IMAGES = "t10k-images", TEST_LABELS = "t10k-labels";
     static Scanner console = new Scanner(System.in);
     static int row = 0, num = 0, column, pixelCount = 0;
-    static int[][] allInfo;
-    static int[][] testInfo;
+    static double[][] allInfo;
+    static double[][] testInfo;
     static final Random rand = new Random();
     static byte[] labels;
     static byte[] testLabels;
     static int[] networkFormat;
-    public static final int MINI_BATCH_SIZE = 200;
-    public static final int SECOND_LAYER_COUNT = 32;
+    public static final int MINI_BATCH_SIZE = 10;
+    public static final int SECOND_LAYER_COUNT = 30;
     public static void getData(){
         InputStream f;
         try {
@@ -31,15 +31,14 @@ public class Training {
             column = new BigInteger(f.readNBytes(4)).intValue();
             pixelCount = row * column;
             byte[] temp = f.readAllBytes();
-            allInfo = new int[num][pixelCount];
+            allInfo = new double[num][pixelCount];
             int size = temp.length;
             int count = 0, subCount = 0;
             for (long i = 0; i < size; i++) {
                 if (temp[(int) i] < 0)
-                    allInfo[count][subCount] = 128 - temp[(int) i];
-
+                    allInfo[count][subCount] = (double)(128 - temp[(int) i]) /255.0;
                 else
-                    allInfo[count][subCount] = temp[(int) i];
+                    allInfo[count][subCount] = (double) temp[(int) i] / 255.0;
                 subCount++;
                 if ((i + 1) % pixelCount == 0) {
                     count++;
@@ -79,7 +78,7 @@ public class Training {
         while (!nums.isEmpty())
             ran.add(nums.remove(rand.nextInt(nums.size())));
         byte[] tempLabel = new byte[num];
-        int [][] tempNums = new int[num][pixelCount];
+        double [][] tempNums = new double[num][pixelCount];
         for (int i = 0; i < num; i++){
             tempLabel[i] = labels[ran.get(i)];
             tempNums[i] = allInfo[ran.get(i)];
@@ -96,15 +95,16 @@ public class Training {
         System.out.println("Before: %" + errorCheck(net));
         while (true) {
             for (int i = 0; i < allInfo.length / MINI_BATCH_SIZE; i++) {
-                int[][] miniBatch = new int[MINI_BATCH_SIZE][pixelCount];
-                int[] answers = new int[MINI_BATCH_SIZE];
+                double[][] miniBatch = new double[MINI_BATCH_SIZE][pixelCount];
+                double[][] answers = new double[MINI_BATCH_SIZE][10];
                 for (int j = 0; j < MINI_BATCH_SIZE; j++) {
                     miniBatch[j] = allInfo[i * MINI_BATCH_SIZE + j];
-                    answers[j] = labels[i * MINI_BATCH_SIZE + j];
+                    answers[j][labels[i * MINI_BATCH_SIZE + j]] = 1.0;
                 }
                 net.backPropagate(miniBatch, answers);
             }
             System.out.println("After: " + errorCheck(net) + "%");
+            shuffleData();
         }
         /*Matrix one = new Matrix(new double[][] {new double[] {1, 2}, new double[] {4, 5}, new double[] {3, 4}});
         Matrix two = new Matrix(new double[][] {new double[] {5, 4, 5}, new double[] {2, 8, 1}});
@@ -129,7 +129,7 @@ public class Training {
                 numCorrect++;
         }
         int temp = rand.nextInt(testInfo.length);
-        outputNum(testInfo[temp]);
+        //outputNum(testInfo[temp]);
         System.out.println(testLabels[temp]);
         System.out.println(Arrays.toString(net.feedForward(testInfo[temp])));
         return 100 * numCorrect / size;
@@ -160,15 +160,14 @@ public class Training {
             int ROW = new BigInteger(f.readNBytes(4)).intValue();
             int COL = new BigInteger(f.readNBytes(4)).intValue();
             byte[] temp = f.readAllBytes();
-            testInfo = new int[NUM][pixelCount];
+            testInfo = new double[NUM][pixelCount];
             int size = temp.length;
             int count = 0, subCount = 0;
             for (long i = 0; i < size; i++) {
                 if (temp[(int) i] < 0)
-                    testInfo[count][subCount] = 128 - temp[(int) i];
-
+                    testInfo[count][subCount] = (double)(128 - temp[(int) i]) / 255;
                 else
-                    testInfo[count][subCount] = temp[(int) i];
+                    testInfo[count][subCount] = (double) temp[(int) i] / 255;
                 subCount++;
                 if ((i + 1) % pixelCount == 0) {
                     count++;
