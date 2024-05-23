@@ -1,7 +1,7 @@
 package Neural_Network;
 
 import java.util.Arrays;
-
+import java.util.function.DoubleUnaryOperator;
 public class Matrix {
     private final double[][] values;
     private final int row;
@@ -47,6 +47,7 @@ public class Matrix {
     }
     public Matrix add(Matrix other) {
         if (this.row != other.row || this.col != other.col) {
+            System.out.println(this.row + " " + this.col + " " + other.row + " " + other.col);
             throw new IllegalArgumentException("Matrix dimensions do not match for Matrix addition.");
         }
 
@@ -59,12 +60,53 @@ public class Matrix {
 
         return new Matrix(product);
     }
+    public Matrix elementMultiply(double mult){
+        double[][] product = new double[this.row][this.col];
+        for (int i = 0; i < row; i++){
+            for (int j = 0; j < col; j++)
+                product[i][j] = values[i][j] * mult;
+        }
+        return new Matrix(product);
+    }
+    public Matrix subtract(Matrix other) {
+        if (this.row != other.row || this.col != other.col) {
+            System.out.println(this.row + " " + this.col + " " + other.row + " " + other.col);
+            throw new IllegalArgumentException("Matrix dimensions do not match for Matrix subtraction.");
+        }
+
+        double[][] product = new double[this.row][this.col];
+        for (int i = 0; i < this.row; i++) {
+            for (int j = 0; j < this.col; j++) {
+                product[i][j] = this.values[i][j] - other.values[i][j];
+            }
+        }
+
+        return new Matrix(product);
+    }
+    public void alterSub(Matrix other) {
+        if (this.row != other.row || this.col != other.col) {
+            System.out.println(this.row + " " + this.col + " " + other.row + " " + other.col);
+            throw new IllegalArgumentException("Matrix dimensions do not match for Matrix subtraction.");
+        }
+
+        for (int i = 0; i < this.row; i++)
+            for (int j = 0; j < this.col; j++)
+                this.values[i][j] -= other.values[i][j];
+    }
     public Matrix transpose(){
         double[][] trans = new double[col][row];
         for (int i = 0; i < col; i++)
             for (int j = 0; j < row; j++)
                 trans[i][j] = values[j][i];
         return new Matrix(trans);
+    }
+    public Matrix applyFunction(DoubleUnaryOperator function){
+        double[][] product = new double[this.row][this.col];
+        for (int i = 0; i < row; i++){
+            for (int j = 0; j < col; j++)
+                product[i][j] = function.applyAsDouble(values[i][j]);
+        }
+        return new Matrix(product);
     }
     public String toString(){
         StringBuilder string = new StringBuilder();

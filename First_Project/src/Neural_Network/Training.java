@@ -116,12 +116,12 @@ public class Training {
         double numCorrect = 0;
         int size = testInfo.length;
         for (int i = 0; i < size; i++){
-            double[] ans = net.feedForward(testInfo[i]);
-            double totalAns = 0;
+            double[][] ans = net.feedForward(testInfo[i]);
+            double totalAns = Double.NEGATIVE_INFINITY;
             int index = 0;
             for (int d = 0; d < 10; d++) {
-                if (ans[d] > totalAns) {
-                    totalAns = ans[d];
+                if (ans[d][0] > totalAns) {
+                    totalAns = ans[d][0];
                     index = d;
                 }
             }
@@ -131,7 +131,7 @@ public class Training {
         int temp = rand.nextInt(testInfo.length);
         //outputNum(testInfo[temp]);
         System.out.println(testLabels[temp]);
-        System.out.println(Arrays.toString(net.feedForward(testInfo[temp])));
+        System.out.println(Arrays.deepToString(net.feedForward(testInfo[temp])));
         return 100 * numCorrect / size;
     }
     static void outputNum(int[] n){
