@@ -8,7 +8,7 @@ public class Network {
     static Matrix[] biases;
     static Matrix[] weights;
     static final Random rand = new Random();
-    static final double LEARNING_RATE = 3;
+    static final double LEARNING_RATE = 1.0;
     static int layerNum;
     static int[] layerCounts;
     public Network(int[] layerNums){
@@ -86,8 +86,8 @@ public class Network {
         for (int i = 0; i < layerNum - 1; i++) {
             weightGradient[i] = totalWeights[i].elementMultiply(LEARNING_RATE / (double)batchSize);
             biasGradient[i] = totalBiases[i].elementMultiply(LEARNING_RATE / (double)batchSize);
-            weights[i].alterSub(weightGradient[i]);
-            biases[i].alterSub(biasGradient[i]);
+            weights[i] = weights[i].add(weightGradient[i]);
+            biases[i] = biases[i].add(biasGradient[i]);
         }
     }
     double sigmoid(double x){ return (1.0 / (1.0 + Math.exp(-x)));}

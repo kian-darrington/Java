@@ -93,7 +93,9 @@ public class Training {
         Network net = new Network(networkFormat);
         System.out.println("Got all data and initialized network");
         System.out.println("Before: %" + errorCheck(net));
+        int epoch = 0;
         while (true) {
+            epoch++;
             for (int i = 0; i < allInfo.length / MINI_BATCH_SIZE; i++) {
                 double[][] miniBatch = new double[MINI_BATCH_SIZE][pixelCount];
                 double[][] answers = new double[MINI_BATCH_SIZE][10];
@@ -103,7 +105,7 @@ public class Training {
                 }
                 net.backPropagate(miniBatch, answers);
             }
-            System.out.println("After: " + errorCheck(net) + "%");
+            System.out.println("Epoch " + epoch + ": " + errorCheck(net) + "%");
             shuffleData();
         }
         /*Matrix one = new Matrix(new double[][] {new double[] {1, 2}, new double[] {4, 5}, new double[] {3, 4}});
@@ -130,8 +132,8 @@ public class Training {
         }
         int temp = rand.nextInt(testInfo.length);
         //outputNum(testInfo[temp]);
-        System.out.println(testLabels[temp]);
-        System.out.println(Arrays.deepToString(net.feedForward(testInfo[temp])));
+        //System.out.println(testLabels[temp]);
+        //System.out.println(Arrays.deepToString(net.feedForward(testInfo[temp])));
         return 100 * numCorrect / size;
     }
     static void outputNum(int[] n){
