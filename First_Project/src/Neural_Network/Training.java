@@ -96,6 +96,7 @@ public class Training {
         int epoch = 0;
         while (true) {
             epoch++;
+            int numCorrect = 0;
             for (int i = 0; i < allInfo.length / MINI_BATCH_SIZE; i++) {
                 double[][] miniBatch = new double[MINI_BATCH_SIZE][pixelCount];
                 double[][] answers = new double[MINI_BATCH_SIZE][10];
@@ -103,9 +104,10 @@ public class Training {
                     miniBatch[j] = allInfo[i * MINI_BATCH_SIZE + j];
                     answers[j][labels[i * MINI_BATCH_SIZE + j]] = 1.0;
                 }
-                net.backPropagate(miniBatch, answers);
+                numCorrect += net.backPropagate(miniBatch, answers);
             }
             System.out.println("Epoch " + epoch + ": " + errorCheck(net) + "%");
+            System.out.println(numCorrect +"/" + num);
             shuffleData();
         }
         /*Matrix one = new Matrix(new double[][] {new double[] {1, 2}, new double[] {4, 5}, new double[] {3, 4}});

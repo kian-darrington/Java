@@ -9,26 +9,15 @@ public class RecursionStuff {
     public static String starString(int n){
         if (n < 0)
             throw new IllegalArgumentException("Negative input detected");
-        else
-            return starStringMod(pow(2, n));
-    }
-    private static String starStringMod(int n){
-        if (n == 1)
+        else if (n == 0)
             return "*";
         else
-            return starStringMod(n / 2) + starStringMod(n / 2);
+            return starString(n - 1) + starString(n - 1);
     }
 
-    //Positive integer recursive power multiplier made because why not and for starString
-    private static int pow2 (int a, int b, int track){
-        if (b > 1)
-            return pow2(a * track, b - 1, track);
-        else
-            return a;
-    }
     public static int pow(int a, int b){
         if (b > 1)
-            return pow2(a * a, b - 1, a);
+            return a * pow(a, b - 1);
         else if (b == 1)
             return a;
         else if (b == 0)
@@ -106,11 +95,8 @@ public class RecursionStuff {
             left = mergeSort(left);
             right = mergeSort(right);
             array = merge(left, right);
-            return array;
         }
-        else {
-            return array;
-        }
+        return array;
     }
     private static ArrayList<String> merge(ArrayList<String> left, ArrayList<String> right){
         ArrayList<String> result = new ArrayList<>();
@@ -118,25 +104,26 @@ public class RecursionStuff {
         while (!left.isEmpty() && !right.isEmpty()){
             if (left.get(0).toLowerCase().getBytes()[i] < right.get(0).toLowerCase().getBytes()[i]) {
                 result.add(left.remove(0));
-                i = 0;
+                i = -1;
             }
             else if (left.get(0).toLowerCase().getBytes()[i] > right.get(0).toLowerCase().getBytes()[i]) {
-                result.add(left.remove(0));
-                i = 0;
+                result.add(right.remove(0));
+                i = -1;
             }
             i++;
         }
-        if (!left.isEmpty())
+        while (!left.isEmpty())
             result.add(left.remove(0));
-        else if (!right.isEmpty())
+        while (!right.isEmpty())
             result.add(right.remove(0));
-        System.out.println(result);
         return result;
     }
 
     //Output stuff
     public static void main(String[] args) {
-        ArrayList<String> temp = new ArrayList<>(List.of(new String[]{"boy", "bot", "wow", "abba", "soon"}));
-        System.out.println(mergeSort(temp));
+        ArrayList<String> temp = new ArrayList<>(List.of(new String[]{"boy", "bot", "wow", "abba", "soon", "poop"}));
+        //System.out.println(temp);
+        for (int i = 0; i < 6; i++)
+            System.out.println(starString(i));
     }
 }

@@ -58,11 +58,11 @@ public class Matrix {
 
         return new Matrix(product);
     }
-    public Matrix elementMultiply(double mult){
+    public Matrix elementMultiply(double num){
         double[][] product = new double[this.row][this.col];
         for (int i = 0; i < row; i++)
             for (int j = 0; j < col; j++)
-                product[i][j] = values[i][j] * mult;
+                product[i][j] = values[i][j] * num;
 
         return new Matrix(product);
     }
@@ -103,13 +103,15 @@ public class Matrix {
         }
         return string.toString();
     }
-    int[] largestValue(){
-        int[] index = new int[2];
+    int largestValue(){
+        int index = 0;
         double highest = Double.NEGATIVE_INFINITY;
         for (int i = 0; i < row; i++){
             for (int j = 0; j < col; j++){
-                if (values[i][j] > highest)
-                    index = new int[] {row, col};
+                if (values[i][j] > highest) {
+                    index = i;
+                    highest = values[i][j];
+                }
             }
         }
         return index;

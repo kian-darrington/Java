@@ -8,7 +8,7 @@ public class Network {
     static Matrix[] biases;
     static Matrix[] weights;
     static final Random rand = new Random();
-    static final double LEARNING_RATE = 1.0;
+    static final double LEARNING_RATE = 3.0;
     static int layerNum;
     static int[] layerCounts;
     public Network(int[] layerNums){
@@ -39,9 +39,9 @@ public class Network {
         return inputs.getValues();
     }
     final int RAW = 0, SIGMOID = 1, SIG_PRIME = 2;
-    public void backPropagate(double[][] miniBatch, double[][] ans) {
+    public int backPropagate(double[][] miniBatch, double[][] ans) {
         int batchSize = ans.length;
-
+        int numCorrect = 0;
         Matrix[][] biasError = new Matrix[batchSize][layerNum - 1]; // Total bias changes
         Matrix[][] weightError = new Matrix[batchSize][layerNum - 1]; // Total weight changes
 
@@ -61,9 +61,13 @@ public class Network {
                 outputs[SIGMOID][i + 1] = outputs[RAW][i + 1].applyFunction(this::sigmoid);
                 outputs[SIG_PRIME][i + 1] = outputs[RAW][i + 1].applyFunction(this::sigmoidPrime);
             }
+            if (outputs[SIGMOID][layerNum - 1].largestValue() == answer.largestValue())
+                numCorrect++;
             Matrix[] costMatrix = new Matrix[layerNum - 1];
+            //Calculates the cost of the final layer to allow for back-prop to take place
             costMatrix[layerNum - 2] = answer.subtract(outputs[SIGMOID][layerNum - 1]).elemProd(
                     outputs[SIG_PRIME][layerNum - 1]);
+            //The actual back-prop code, calculating the amount needed to change in every individual weight and bias
             for (int i = layerNum - 1; i > 0; i--) {
                 if (i < layerNum - 1)
                     costMatrix[i - 1] = weightsTranspose[i].dotProd(costMatrix[i]).elemProd(outputs[SIG_PRIME][i]);
@@ -71,6 +75,7 @@ public class Network {
                 weightError[count][i - 1] = costMatrix[i - 1].dotProd(outputs[SIGMOID][i - 1].transpose());
             }
         }
+        //Adds all the weight and bias changes together to allow for averaging
         Matrix[] totalWeights = new Matrix[layerNum - 1];
         Matrix[] totalBiases = new Matrix[layerNum - 1];
         for (int i = 0; i < layerNum - 1; i++) {
@@ -81,6 +86,8 @@ public class Network {
                 totalBiases[i] = totalBiases[i].add(biasError[count][i]);
             }
         }
+        //Takes the sum of all the bias and weight changes and averages them to alter the weight and bias matrices
+        //accordingly for each layer in the network
         Matrix[] weightGradient = new Matrix[layerNum - 1];
         Matrix[] biasGradient = new Matrix[layerNum - 1];
         for (int i = 0; i < layerNum - 1; i++) {
@@ -89,7 +96,10 @@ public class Network {
             weights[i] = weights[i].add(weightGradient[i]);
             biases[i] = biases[i].add(biasGradient[i]);
         }
+        return numCorrect;
     }
+    //Current activation function
     double sigmoid(double x){ return (1.0 / (1.0 + Math.exp(-x)));}
+    //Derivative of the activation function
     double sigmoidPrime(double x) { return sigmoid(x)*(1.0 - sigmoid(x)); }
 }
