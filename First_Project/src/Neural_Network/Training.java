@@ -88,15 +88,16 @@ public class Training {
     }
     public static void main (String[] args){
         getData();
-        shuffleData();
         getTrainingData();
         Network net = new Network(networkFormat);
         System.out.println("Got all data and initialized network");
-        System.out.println("Before: %" + errorCheck(net));
+        System.out.println("Before: " + errorCheck(net) + "%");
         int epoch = 0;
         while (true) {
             epoch++;
             int numCorrect = 0;
+            long startTime = System.nanoTime();
+            shuffleData();
             for (int i = 0; i < allInfo.length / MINI_BATCH_SIZE; i++) {
                 double[][] miniBatch = new double[MINI_BATCH_SIZE][pixelCount];
                 double[][] answers = new double[MINI_BATCH_SIZE][10];
@@ -108,7 +109,7 @@ public class Training {
             }
             System.out.println("Epoch " + epoch + ": " + errorCheck(net) + "%");
             System.out.println(numCorrect +"/" + num);
-            shuffleData();
+            System.out.println((float)(System.nanoTime() - startTime) / 1000000000 + " seconds");
         }
         /*Matrix one = new Matrix(new double[][] {new double[] {1, 2}, new double[] {4, 5}, new double[] {3, 4}});
         Matrix two = new Matrix(new double[][] {new double[] {5, 4, 5}, new double[] {2, 8, 1}});
@@ -138,7 +139,7 @@ public class Training {
         //System.out.println(Arrays.deepToString(net.feedForward(testInfo[temp])));
         return 100 * numCorrect / size;
     }
-    static void outputNum(int[] n){
+    static void outputNum(double[] n){
         for (int i = 0; i < pixelCount; i++) {
             if (n[i] != 0)
                 System.out.print((char) 0x2588);
