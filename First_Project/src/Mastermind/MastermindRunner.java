@@ -20,7 +20,7 @@ public class MastermindRunner {
                 for (int p = 0; p < COLOR_AMOUNT; p++){
                     for (int w = 0; w < COLOR_AMOUNT; w++){
                         String answer = "" + i + o + p + w;
-                        guessNum += m.multiKnuthGuess(answer);
+                        guessNum += m.knuthGuess(answer);
                         timesRan++;
                     }
                 }
